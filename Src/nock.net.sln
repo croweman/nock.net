@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nock.net", "nock.net\nock.net.csproj", "{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nock.net.Tests", "nock.net.Tests\nock.net.Tests.csproj", "{7A7B3778-54A0-456E-90EC-E1612C5991EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A7B3778-54A0-456E-90EC-E1612C5991EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A7B3778-54A0-456E-90EC-E1612C5991EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A7B3778-54A0-456E-90EC-E1612C5991EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A7B3778-54A0-456E-90EC-E1612C5991EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
