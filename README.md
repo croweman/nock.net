@@ -9,6 +9,9 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
 - [Install](#install)  
 - [Use](#use)  
   - [Specifying request body](#specifying-request-body)  
+  - [Replying with exceptions](#replying-with-exceptions)
+  - [Replying with more detailed responses](#Replying-with-more-detailed-responses)
+  - [Specifying headers](#specifying-headers)
 - [Expectations](#expectations)  
 - [How does it work?](#how-does-it-work)  
 - [License](#license)  
@@ -40,9 +43,35 @@ You can specify the request body to be matched as the second argument to the Get
 
 ```c#
 var nock = new Nock("http://domain.com")
-    .Get("/users/1", "{ add: \"1 + 4\"")
+    .Get("/users/1", "{ add: \"1 + 4\" }")
     .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
+
+### Replying with exceptions
+
+You can reply with an exception like this:
+
+```c#
+var nock = new Nock("http://domain.com")
+    .Get("/users/1")
+    .Reply(new WebException("An unexpected exception occurred"));
+```
+
+### Replying with more detailed responses
+
+```c#
+var response = new TestHttpWebResponse("The body")
+{
+    StatusCode = HttpStatusCode.Created,
+    CharacterSet = "blah"
+};
+
+var nock = new Nock("http://domain.com")
+    .Get("/users/1")
+    .Reply(response);
+```
+
+### Specifying headers
 
 ```c#
 
