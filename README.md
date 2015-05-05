@@ -8,7 +8,7 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
 
 - [Install](#install)  
 - [Use](#use)  
-  - [Specifying headers](#specifying-headers)  
+  - [Specifying request body](#specifying-request-body)  
 - [Expectations](#expectations)  
 - [How does it work?](#how-does-it-work)  
 - [License](#license)  
@@ -34,9 +34,15 @@ public void Test()
 }
 ```
 
-### Specifying headers
+### Specifying request body
 
+You can specify the request body to be matched as the second argument to the Get, Post, Put or Delete specifications like this:
 
+```c#
+var nock = new Nock("http://domain.com")
+    .Get("/users/1", "{ add: \"1 + 4\"")
+    .Reply(HttpStatusCode.OK, "{ value: 5 }");
+```
 
 ```c#
 
