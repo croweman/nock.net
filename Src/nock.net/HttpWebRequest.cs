@@ -9,6 +9,9 @@ namespace Nock.net
     public sealed class HttpWebRequest : IHttpWebRequest
     {
         private readonly System.Net.HttpWebRequest _httpWebRequest;
+        internal string Body;
+
+        private CustomMemoryStream _requestStream;
 
         public HttpWebRequest(System.Net.HttpWebRequest httpWebRequest)
         {
@@ -344,9 +347,12 @@ namespace Nock.net
 
         public Stream GetRequestStream()
         {
-            var response = ResponseHelper.FindTestHttpWebResponse(this, false);
+            var response = ResponseHelper.FindTestHttpWebResponse(this, false, true);
 
-            return response == null ? _httpWebRequest.GetRequestStream() : new MemoryStream();
+            if (response == null)
+                return _httpWebRequest.GetRequestStream();
+
+            return _requestStream ?? (_requestStream = new CustomMemoryStream(SetRequestBody));
         }
 
         public Stream GetRequestStream(out TransportContext context)
@@ -362,6 +368,11 @@ namespace Nock.net
                 return ResponseHelper.BuildNockHttpWebResponse(responseDetail);
 
             return new HttpWebResponse((System.Net.HttpWebResponse)_httpWebRequest.GetResponse());
+        }
+
+        internal void SetRequestBody(string body)
+        {
+            Body = body;
         }
 
     }

@@ -11,13 +11,15 @@ namespace Nock.net
         public string Response { get; private set; }
         public HttpStatusCode StatusCode { get; private set; }
         public WebHeaderCollection Headers { get; private set; }
+        public string Body { get; private set; }
+        public WebHeaderCollection RequestHeaders { get; private set; }
         public Exception Exception { get; private set; }
         public string ContentType { get; private set; }
         public TestHttpWebResponse TestHttpWebResponse { get; private set; }
 
         public ResponseDetail(string url, string path, string response, HttpStatusCode statusCode,
             Nock.Method method, WebHeaderCollection headers, Exception exception, string contentType,
-            TestHttpWebResponse testHttpWebResponse)
+            TestHttpWebResponse testHttpWebResponse, string body, WebHeaderCollection requestHeaders)
         {
             Url = url;
             Path = path;
@@ -25,6 +27,8 @@ namespace Nock.net
             Method = method;
             StatusCode = statusCode;
             Headers = headers;
+            Body = body;
+            RequestHeaders = requestHeaders;
             Exception = exception;
             ContentType = contentType;
             TestHttpWebResponse = testHttpWebResponse;

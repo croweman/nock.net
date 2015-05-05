@@ -23,14 +23,14 @@ namespace Nock.net.Tests
 
             if (resultMessage == "WebException")
             {
-                new global::Nock.net.Nock("https://domain-name.com")
+                new Nock("https://domain-name.com")
                     .ContentType("application/json; encoding='utf-8'")
                     .Post("/api/v2/action/")
                     .Reply(new WebException("This is a web exception"));
             }
             else
             {
-                new global::Nock.net.Nock("https://domain-name.com")
+                new Nock("https://domain-name.com")
                     .ContentType("application/json; encoding='utf-8'")
                     .Post("/api/v2/action/")
                     .Reply(HttpStatusCode.OK, responseJson);                

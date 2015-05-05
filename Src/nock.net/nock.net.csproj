@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CustomMemoryStream.cs" />
     <Compile Include="IHttpWebRequest.cs" />
     <Compile Include="IHttpWebResponse.cs" />
     <Compile Include="Nock.cs" />

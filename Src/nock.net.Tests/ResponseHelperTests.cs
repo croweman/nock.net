@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net;
+using System.Text;
 using NUnit.Framework;
 
 namespace Nock.net.Tests
@@ -10,8 +11,8 @@ namespace Nock.net.Tests
         [SetUp]
         public void SetUp()
         {
-            global::Nock.net.Nock.ClearAll();
-            global::Nock.net.Nock.Testing = false;
+            Nock.ClearAll();
+            Nock.Testing = false;
         }
 
         [Test]
@@ -27,7 +28,7 @@ namespace Nock.net.Tests
         [Test]
         public void FindTestHttpWebResponseReturnsANullObjectIfResponseDetailsExistButTestingIsFalse()
         {
-            global::Nock.net.Nock.ResponseDetails.Add(new ResponseDetail("http://www.nock-fake-domain.co.uk", "/path/", "Test", HttpStatusCode.OK, global::Nock.net.Nock.Method.GET, null, null, null, null));
+            Nock.ResponseDetails.Add(new ResponseDetail("http://www.nock-fake-domain.co.uk", "/path/", "Test", HttpStatusCode.OK, Nock.Method.GET, null, null, null, null, null, new WebHeaderCollection()));
 
             var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
 
@@ -41,7 +42,7 @@ namespace Nock.net.Tests
         {
             var headers = new WebHeaderCollection { { "x-custom", "custom-value" } };
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(HttpStatusCode.Created, "The response", headers);
 
@@ -65,7 +66,7 @@ namespace Nock.net.Tests
 
             Assert.That(body, Is.EqualTo("The response"));
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(0));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -73,7 +74,7 @@ namespace Nock.net.Tests
         {
             var headers = new WebHeaderCollection { { "x-custom", "custom-value" } };
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(HttpStatusCode.Created, "The response", headers);
 
@@ -97,7 +98,7 @@ namespace Nock.net.Tests
 
             Assert.That(body, Is.EqualTo("The response"));
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -111,7 +112,7 @@ namespace Nock.net.Tests
                 ContentType = "application/json"
             };
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(testHttpWebResponse);
 
@@ -136,7 +137,7 @@ namespace Nock.net.Tests
 
             Assert.That(body, Is.EqualTo("I am a test response"));
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(0));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -144,7 +145,7 @@ namespace Nock.net.Tests
         {
             var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(testHttpWebResponse);
 
@@ -162,7 +163,7 @@ namespace Nock.net.Tests
         {
             var webException = new WebException("oh no!");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(webException);
 
@@ -172,7 +173,7 @@ namespace Nock.net.Tests
             
             Assert.That(exception.Message, Is.EqualTo("oh no!"));
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(0));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -180,7 +181,7 @@ namespace Nock.net.Tests
         {
             var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .ContentType("application/json")
                 .Get("/path/")
                 .Reply(testHttpWebResponse);
@@ -191,7 +192,7 @@ namespace Nock.net.Tests
             var response = ResponseHelper.FindTestHttpWebResponse(request);
 
             Assert.That(response, Is.Null);
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -199,7 +200,7 @@ namespace Nock.net.Tests
         {
             var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(testHttpWebResponse);
 
@@ -209,7 +210,7 @@ namespace Nock.net.Tests
             var response = ResponseHelper.FindTestHttpWebResponse(request);
 
             Assert.That(response, Is.Null);
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -217,7 +218,7 @@ namespace Nock.net.Tests
         {
             var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(testHttpWebResponse);
 
@@ -226,7 +227,7 @@ namespace Nock.net.Tests
             var response = ResponseHelper.FindTestHttpWebResponse(request);
 
             Assert.That(response, Is.Null);
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
         }
 
         [Test]
@@ -235,17 +236,17 @@ namespace Nock.net.Tests
             var xmlResponse = new TestHttpWebResponse("<somexml />");
             var jsonResponse = new TestHttpWebResponse("{ a:\"\"}");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .ContentType("application/xml")
                 .Get("/path/")
                 .Reply(xmlResponse);
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .ContentType("application/json")
                 .Get("/path/")
                 .Reply(jsonResponse);
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(2));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(2));
 
             var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
             request.Method = "Get";
@@ -254,7 +255,7 @@ namespace Nock.net.Tests
             var response = ResponseHelper.FindAndBuildTestHttpWebResponse(request);
 
             Assert.That(response, Is.EqualTo(jsonResponse));
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
 
             request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
             request.Method = "Get";
@@ -263,7 +264,7 @@ namespace Nock.net.Tests
             response = ResponseHelper.FindAndBuildTestHttpWebResponse(request);
 
             Assert.That(response, Is.EqualTo(xmlResponse));
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(0));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
         }
 
         [Test]
@@ -272,15 +273,15 @@ namespace Nock.net.Tests
             var getResponse = new TestHttpWebResponse("<somexml />");
             var postResponse = new TestHttpWebResponse("{ a:\"\"}");
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
                 .Reply(getResponse);
 
-            new global::Nock.net.Nock("http://www.nock-fake-domain.co.uk")
+            new Nock("http://www.nock-fake-domain.co.uk")
                 .Post("/path/")
                 .Reply(postResponse);
 
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(2));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(2));
 
             var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
             request.Method = "POST";
@@ -288,7 +289,7 @@ namespace Nock.net.Tests
             var response = ResponseHelper.FindAndBuildTestHttpWebResponse(request);
 
             Assert.That(response, Is.EqualTo(postResponse));
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(1));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
 
             request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
             request.Method = "GET";
@@ -296,7 +297,144 @@ namespace Nock.net.Tests
             response = ResponseHelper.FindAndBuildTestHttpWebResponse(request);
 
             Assert.That(response, Is.EqualTo(getResponse));
-            Assert.That(global::Nock.net.Nock.ResponseDetails.Count, Is.EqualTo(0));
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FindTestHttpWebResponseReturnsNullIfBodyInRequestAndNockDiffers()
+        {
+            var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
+
+            new Nock("http://www.nock-fake-domain.co.uk")
+                .Post("/path/", "nock body")
+                .Reply(testHttpWebResponse);
+
+            var postData = "Request body";
+            var bytes = Encoding.UTF8.GetBytes(postData);
+
+            var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
+            request.Method = "POST";
+
+            using (var requestStream = request.GetRequestStream())
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+                requestStream.Close();
+            }
+
+            var response = ResponseHelper.FindTestHttpWebResponse(request);
+
+            Assert.That(response, Is.Null);
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void FindTestHttpWebResponseReturnsAValidStandardTestHttpWebResponseObjectIfBodyInRequestAndNockAreEqual()
+        {
+            var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
+
+            new Nock("http://www.nock-fake-domain.co.uk")
+                .Post("/path/", "Request body")
+                .Reply(testHttpWebResponse);
+
+            var postData = "Request body";
+            var bytes = Encoding.UTF8.GetBytes(postData);
+
+            var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
+            request.Method = "POST";
+
+            using (var requestStream = request.GetRequestStream())
+            {
+                requestStream.Write(bytes, 0, bytes.Length);
+                requestStream.Close();
+            }
+
+            var response = ResponseHelper.FindTestHttpWebResponse(request);
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FindTestHttpWebResponseReturnsNullIfRequestAndNockRequestHeadersDoNotMatch()
+        {
+            var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
+
+            var requestHeaders = new WebHeaderCollection
+            {
+                { "Content-Type", "application/xml" }, 
+                { "x-custom", "val" }
+            };
+
+            new Nock("http://www.nock-fake-domain.co.uk")
+                .Post("/path/")
+                .RequestHeaders(requestHeaders)
+                .Reply(testHttpWebResponse);
+
+
+            var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
+            request.Method = "POST";
+            request.ContentType = "application/xml";
+
+            var response = ResponseHelper.FindTestHttpWebResponse(request);
+
+            Assert.That(response, Is.Null);
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void FindTestHttpWebResponseReturnsNullIfRequestAndNockRequestHeadersDoNotMatch2()
+        {
+            var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
+
+            var requestHeaders = new WebHeaderCollection
+            {
+                { "Content-Type", "application/xml" }, 
+                { "x-custom", "val" }
+            };
+
+            new Nock("http://www.nock-fake-domain.co.uk")
+                .Post("/path/")
+                .RequestHeaders(requestHeaders)
+                .Reply(testHttpWebResponse);
+
+
+            var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
+            request.Method = "POST";
+            request.ContentType = "application/xml";
+            request.Headers.Add("x-custom", "val2");
+
+            var response = ResponseHelper.FindTestHttpWebResponse(request);
+
+            Assert.That(response, Is.Null);
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void FindTestHttpWebResponseReturnsAValidStandardTestHttpWebResponseObjectIfRequestAndNockRequestHeadersMatch()
+        {
+            var testHttpWebResponse = new TestHttpWebResponse("I am a test response");
+
+            var requestHeaders = new WebHeaderCollection
+            {
+                { "Content-Type", "application/xml" }, 
+                { "x-custom", "val" }
+            };
+
+            new Nock("http://www.nock-fake-domain.co.uk")
+                .Post("/path/")
+                .RequestHeaders(requestHeaders)
+                .Reply(testHttpWebResponse);
+
+
+            var request = HttpWebRequest.CreateRequest("http://www.nock-fake-domain.co.uk/path/");
+            request.Method = "POST";
+            request.ContentType = "application/xml";
+            request.Headers.Add("x-custom", "val");
+
+            var response = ResponseHelper.FindTestHttpWebResponse(request);
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(Nock.ResponseDetails.Count, Is.EqualTo(0));
         }
 
 

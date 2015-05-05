@@ -1,4 +1,7 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
+using System.Net;
 
 namespace Nock.net
 {
@@ -6,7 +9,7 @@ namespace Nock.net
     {
         private static readonly object LockObject = new object();
 
-        public static ResponseDetail FindTestHttpWebResponse(HttpWebRequest request, bool remove = true)
+        public static ResponseDetail FindTestHttpWebResponse(HttpWebRequest request, bool remove = true, bool findingForRequest = false)
         {
             if (!Nock.Testing || Nock.ResponseDetails.Count == 0)
                 return null;
@@ -29,6 +32,17 @@ namespace Nock.net
 
                     if (!string.IsNullOrWhiteSpace(responseDetail.ContentType) && !string.Equals(responseDetail.ContentType, contentType, StringComparison.OrdinalIgnoreCase))
                         continue;
+
+                    if (!RequestHeadersMatch(responseDetail.RequestHeaders, request.Headers))
+                        continue;
+
+                    if (!findingForRequest && !string.IsNullOrWhiteSpace(responseDetail.Body))
+                    {
+                        var body = request.Body;
+
+                        if (!string.IsNullOrWhiteSpace(body) && !string.Equals(responseDetail.Body, body))
+                            continue;
+                    }
 
                     if (remove)
                         Nock.ResponseDetails.Remove(responseDetail);
@@ -62,6 +76,26 @@ namespace Nock.net
             };
 
             return response;
+        }
+
+        private static bool RequestHeadersMatch(WebHeaderCollection requiredRequestHeaders, WebHeaderCollection requestHeaders)
+        {
+            var matched = true;
+
+            foreach (var requiredKey in requiredRequestHeaders.AllKeys)
+            {
+                var requiredValue = requiredRequestHeaders[requiredKey];
+
+                var matchingKey = requestHeaders.AllKeys.FirstOrDefault(x => string.Equals(requiredKey, x, StringComparison.OrdinalIgnoreCase));
+
+                if (string.IsNullOrWhiteSpace(matchingKey) || !string.Equals(requiredValue, requestHeaders[requiredKey]))
+                {
+                    matched = false;
+                    break;
+                }
+            }
+
+            return matched;
         }
     }
 }

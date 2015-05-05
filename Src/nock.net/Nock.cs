@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Reflection;
+using System.Text;
 
 namespace Nock.net
 {
@@ -16,6 +18,8 @@ namespace Nock.net
         private string _path;
         private Method _method;
         private string _contentType;
+        private string _body;
+        private WebHeaderCollection _requestHeaders = new WebHeaderCollection();
 
         public enum Method
         {
@@ -40,7 +44,7 @@ namespace Nock.net
             Testing = true;
         }
 
-        private Nock SetMethod(string path, Method method)
+        private Nock SetMethod(string path, Method method, string body = null)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Path must be defined");
@@ -50,32 +54,34 @@ namespace Nock.net
                 
             _path = path;
             _method = method;
+            _body = body;
+
             return this;
         }
 
-        public Nock Get(string path)
+        public Nock Get(string path, string body = null)
         {
-            return SetMethod(path, Method.GET);
+            return SetMethod(path, Method.GET, body);
         }
 
-        public Nock Post(string path)
+        public Nock Post(string path, string body = null)
         {
-            return SetMethod(path, Method.POST);
+            return SetMethod(path, Method.POST, body);
         }
 
-        public Nock Put(string path)
+        public Nock Put(string path, string body = null)
         {
-            return SetMethod(path, Method.PUT);
+            return SetMethod(path, Method.PUT, body);
+        }
+
+        public Nock Delete(string path, string body = null)
+        {
+            return SetMethod(path, Method.DELETE, body);
         }
 
         public Nock Head(string path)
         {
             return SetMethod(path, Method.HEAD);
-        }
-
-        public Nock Delete(string path)
-        {
-            return SetMethod(path, Method.DELETE);
         }
 
         public Nock Patch(string path)
@@ -111,7 +117,7 @@ namespace Nock.net
             if (response == null)
                 response = string.Empty;
 
-            _responseDetail = new ResponseDetail(_url, _path, response, statusCode, _method, headers, null, _contentType, null);
+            _responseDetail = new ResponseDetail(_url, _path, response, statusCode, _method, headers, null, _contentType, null, _body, _requestHeaders);
              ResponseDetails.Add(_responseDetail);
             _built = true;
 
@@ -129,7 +135,7 @@ namespace Nock.net
             if (string.IsNullOrEmpty(_path))
                 throw new ArgumentException("Path must be defined");
 
-            _responseDetail = new ResponseDetail(_url, _path, "", HttpStatusCode.OK, _method, null, exception, _contentType, null);
+            _responseDetail = new ResponseDetail(_url, _path, "", HttpStatusCode.OK, _method, null, exception, _contentType, null, _body, _requestHeaders);
             ResponseDetails.Add(_responseDetail);
             _built = true;
 
@@ -147,10 +153,19 @@ namespace Nock.net
             if (string.IsNullOrEmpty(_path))
                 throw new ArgumentException("Path must be defined");
 
-            _responseDetail = new ResponseDetail(_url, _path, "", HttpStatusCode.OK, _method, null, null, _contentType, testHttpWebResponse);
+            _responseDetail = new ResponseDetail(_url, _path, "", HttpStatusCode.OK, _method, null, null, _contentType, testHttpWebResponse, _body, _requestHeaders);
             ResponseDetails.Add(_responseDetail);
             _built = true;
 
+            return this;
+        }
+
+        public Nock RequestHeaders(WebHeaderCollection headers)
+        {
+            if (headers == null)
+                throw new ArgumentException("Request headers must be defined");
+
+            _requestHeaders = headers;
             return this;
         }
 
