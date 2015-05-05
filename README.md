@@ -7,8 +7,8 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
 ## Table of contents
 
 **[Install](#install)**  
-**[Use](#use)**
-**[How does it work?](#how-does-it-work)** 
+**[Use](#use)**  
+**[How does it work?](#how-does-it-work)**  
 **[License](#license)**  
 
 
