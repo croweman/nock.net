@@ -32,10 +32,11 @@ public void Test()
         .Get("/users/1")
         .Reply(HttpStatusCode.OK, "{ value: 5 }");
 }
+```
 
 ### Specifying headers
 
-```
+
 
 ```c#
 
