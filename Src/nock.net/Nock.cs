@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Reflection;
-using System.Text;
 
 namespace Nock.net
 {
     public sealed class Nock
     {
+
         internal static readonly List<ResponseDetail> ResponseDetails = new List<ResponseDetail>();
         internal static bool Testing;
 
@@ -181,6 +180,11 @@ namespace Nock.net
             {
                 ResponseDetails.Add(_responseDetail);
             }
+        }
+
+        public bool Done()
+        {
+            return _responseDetail.IsDone;
         }
 
         public static void ClearAll()

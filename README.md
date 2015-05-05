@@ -8,6 +8,7 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
 
 **[Install](#install)**  
 **[Use](#use)**  
+**[Expectations](#expectations)**  
 **[How does it work?](#how-does-it-work)**  
 **[License](#license)**  
 
@@ -18,6 +19,19 @@ Either reference the Nock.net assembly or Install from nuget.
 
 ## Use
 
+In your test you can setup a mocking object like the following:
+
+```c#
+using Nock.net;
+
+[Test]
+public void Test()
+{
+    var nock = new Nock("http://domain.com")
+        .Get("/users/1")
+        .Reply(HttpStatusCode.OK, "{ value: 5 }");
+}
+```
 
 ```c#
 
@@ -25,9 +39,15 @@ Nock.ClearAll();
 
 ```
 
+## Expectations
+
+isDone
+
 ## How does it work?
 
-blah blah it provides wrapper over request and response and used interfaces etc
+The Nock assembly provides wrapper objects over the standard System.Net HttpWebResponse and HttpWebRequest objects.
+
+When Nocks have been created in your tests then relevant TestHttpWebResponse objects will be returned.
 
 ## License
 

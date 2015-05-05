@@ -11,6 +11,44 @@ namespace Nock.net.Tests
     public class AcceptanceTests
     {
 
+        [SetUp]
+        public void SetUp()
+        {
+            Nock.ClearAll();
+        }
+
+        [Test]
+        public void CallingDoneOnANockReturnsFalseIfTheNockResponseWasNotUsed()
+        {
+            var nock = new Nock("https://domain-name.com")
+                .ContentType("application/json; encoding='utf-8'")
+                .Get("/api/v2/action/")
+                .Reply(HttpStatusCode.OK, "The body");
+
+            var request = HttpWebRequest.CreateRequest("https://domain-name.com/api/v2/action/");
+            request.ContentType = "application/json; encoding='utf-8'";
+            request.Method = "GET";
+
+            Assert.That(nock.Done(), Is.False); 
+        }
+
+        [Test]
+        public void CallingDoneOnANockReturnsTrueIfTheNockResponseWasUsed()
+        {
+            var nock = new Nock("https://domain-name.com")
+                .ContentType("application/json; encoding='utf-8'")
+                .Get("/api/v2/action/")
+                .Reply(HttpStatusCode.OK, "The body");
+
+            var request = HttpWebRequest.CreateRequest("https://domain-name.com/api/v2/action/");
+            request.ContentType = "application/json; encoding='utf-8'";
+            request.Method = "GET";
+
+            var response = request.GetResponse();
+
+            Assert.That(nock.Done(), Is.True);
+        }
+
         [TestCase(HttpStatusCode.OK, "Added", Status.OK)]
         [TestCase(HttpStatusCode.OK, "User not allowed", Status.Forbidden)]
         [TestCase(HttpStatusCode.OK, "User could not be found", Status.NotFound)]

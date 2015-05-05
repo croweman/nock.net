@@ -45,7 +45,10 @@ namespace Nock.net
                     }
 
                     if (remove)
+                    {
+                        responseDetail.IsDone = true;
                         Nock.ResponseDetails.Remove(responseDetail);
+                    }
 
                     return responseDetail;
                 }

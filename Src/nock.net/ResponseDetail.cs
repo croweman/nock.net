@@ -16,6 +16,7 @@ namespace Nock.net
         public Exception Exception { get; private set; }
         public string ContentType { get; private set; }
         public TestHttpWebResponse TestHttpWebResponse { get; private set; }
+        public bool IsDone { get; set; }
 
         public ResponseDetail(string url, string path, string response, HttpStatusCode statusCode,
             Nock.Method method, WebHeaderCollection headers, Exception exception, string contentType,
