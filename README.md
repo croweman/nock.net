@@ -73,11 +73,28 @@ var nock = new Nock("http://domain.com")
 
 ### Specifying headers
 
+Header field names are case-insensitive
+
+### Specifying request headers
+
+You can specify the request headers to be matched against like this:
+
+```c#
+var webHeaders = new WebHeaderCollection { { "x-custom", "value" } };
+
+var nock = new Nock("http://domain.com")
+   .Get("/users/1", "{ add: \"1 + 4\" }")
+   .RequestHeaders(webHeaders)
+   .Reply(HttpStatusCode.OK, "{ value: 5 }");
+```
+
 ```c#
 
 Nock.ClearAll();
 
 ```
+
+content type
 
 Returning specific test responses
 
