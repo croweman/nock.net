@@ -160,7 +160,7 @@ Assert.That(nock.Done(), Is.True);
 
 ### Real world
 
-Below is a real world usage sample with implemented code and test.
+Below is a real world usage sample with test and implementation code.
 
 ```c#
 [TestCase(HttpStatusCode.OK, "Added", Status.OK)]
