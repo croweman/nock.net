@@ -4,6 +4,8 @@ Nock.net is an HTTP mocking library for .Net
 
 Nock.net can be used to aid in testing modules that perform HTTP requests in isolation.
 
+Nock.net.HttpWebRequest and Nock.net.IHttpWebResponse objects need to be used instead of the Standard System.Net HttpWebRequest and HttpWebResponse.
+
 It came to life because of nock in the node js world.
 
 ## Table of contents
@@ -221,7 +223,7 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
 
    var bytes = Encoding.UTF8.GetBytes(postData);
 
-   var request = HttpWebRequest.CreateRequest("https://domain-name.com/api/v2/action/");
+   var request = Nock.net.HttpWebRequest.CreateRequest("https://domain-name.com/api/v2/action/");
    request.ContentType = "application/json; encoding='utf-8'";
    request.ContentLength = bytes.Length;
    request.Method = "POST";
@@ -232,7 +234,7 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
       requestStream.Close();
    }
 
-   IHttpWebResponse response = null;
+   Nock.net.IHttpWebResponse response = null;
 
    try
    {
@@ -285,7 +287,7 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
 
 The Nock assembly provides wrapper objects over the standard System.Net HttpWebResponse and HttpWebRequest objects.
 
-When Nocks have been created in your tests then relevant TestHttpWebResponse objects will be returned.
+When Nocks have been created in your tests then relevant Nock.net.TestHttpWebResponse objects will be returned, these objects implement the Nock.net.IHttpWebResponse interface.
 
 ## License
 
