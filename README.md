@@ -12,6 +12,7 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
   - [Replying with exceptions](#replying-with-exceptions)
   - [Replying with more detailed responses](#Replying-with-more-detailed-responses)
   - [Specifying headers](#specifying-headers)
+    - [Specifying request headers](#specifying-request-headers)
 - [Expectations](#expectations)  
 - [How does it work?](#how-does-it-work)  
 - [License](#license)  
