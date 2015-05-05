@@ -47,6 +47,17 @@ public void Test()
 }
 ```
 
+You would then need implementation logic that would Create a Nock.net.HttpWebRequest and retrieve a response like this:
+
+```#
+Nock.net.HttpWebRequest request = Nock.net.HttpWebRequest.CreateRequest("https://domain.com/users/1");
+request.Method = "GET";
+
+Nock.net.IHttpWebResponse response = request.GetResponse();;
+```
+
+Nock.net.HttpWebRequest and Nock.netHttpWebResponse objects are wrappers over the System.Net.HttpWebResponse and System.Net.HttpWebRequest objects.
+
 ### Specifying request body
 
 You can specify the request body to be matched as the second argument to the Get, Post, Put or Delete specifications like this:
