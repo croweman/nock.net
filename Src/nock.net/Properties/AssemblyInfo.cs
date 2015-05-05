@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("nock.net")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Nock.net is an HTTP mocking library for .Net.  Nock.net can be used to aid in testing modules that perform HTTP requests in isolation.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("nock.net")]
