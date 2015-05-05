@@ -18,7 +18,7 @@ It came to life because of nock in the node js world.
     - [Specifying reply headers](#specifying-reply-headers)
   - [Specifying content type](#specifying-content-type)
   - [Repeat response n times](#repeat-response-n-times)
-  - [Real world](#real-world)
+  - [Real world example](#real-world-example)
 - [Expectations](#expectations)  
 - [Restoring](#restoring)  
 - [How does it work?](#how-does-it-work)  
@@ -158,7 +158,7 @@ var nock = new Nock("http://domain.com")
 Assert.That(nock.Done(), Is.True);
 ```
 
-### Real world
+### Real world example
 
 Below is a real world usage sample with test and implementation code.
 
