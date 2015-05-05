@@ -8,6 +8,7 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
 
 **[Install](#install)**  
 **[Use](#use)**  
+***[Specifying headers](#specifying-headers)***
 **[Expectations](#expectations)**  
 **[How does it work?](#how-does-it-work)**  
 **[License](#license)**  
@@ -31,6 +32,9 @@ public void Test()
         .Get("/users/1")
         .Reply(HttpStatusCode.OK, "{ value: 5 }");
 }
+
+### Specifying headers
+
 ```
 
 ```c#
@@ -38,6 +42,8 @@ public void Test()
 Nock.ClearAll();
 
 ```
+
+Returning specific test responses
 
 ## Expectations
 
