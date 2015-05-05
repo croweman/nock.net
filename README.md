@@ -13,7 +13,11 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
   - [Replying with more detailed responses](#Replying-with-more-detailed-responses)
   - [Specifying headers](#specifying-headers)
     - [Specifying request headers](#specifying-request-headers)
+    - [Specifying reply headers](#specifying-reply-headers)
+  - [Specifying content type](#specifying-content-type)
+  - [Repeat response n times](#repeat-response-n-times) 
 - [Expectations](#expectations)  
+- [Restoring](#restoring)  
 - [How does it work?](#how-does-it-work)  
 - [License](#license)  
 
@@ -48,6 +52,8 @@ var nock = new Nock("http://domain.com")
     .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
 
+If no request body is defined on the Nock then the body will not be used for matching
+
 ### Replying with exceptions
 
 You can reply with an exception like this:
@@ -64,6 +70,7 @@ var nock = new Nock("http://domain.com")
 var response = new TestHttpWebResponse("The body")
 {
     StatusCode = HttpStatusCode.Created,
+    ContentType = "application/json",
     CharacterSet = "blah"
 };
 
@@ -84,15 +91,54 @@ You can specify the request headers to be matched against like this:
 var webHeaders = new WebHeaderCollection { { "x-custom", "value" } };
 
 var nock = new Nock("http://domain.com")
-   .Get("/users/1", "{ add: \"1 + 4\" }")
+   .Get("/users/1")
    .RequestHeaders(webHeaders)
    .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
 
+If no request headers are defined on the Nock then the request headers will not be used for matching
+
+### Specifying reply headers
+
+You can specify the reply headers like this:
+
 ```c#
+var reponseHeaders = new WebHeaderCollection { { "x-custom", "value" } };
 
+var nock = new Nock("http://domain.com")
+   .Get("/users/1")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }", responseHeaders);
+```
+
+### Repeat response n times
+
+You are able to specify the number of times to repeat the same response.
+
+```c#
+var nock = new Nock("http://domain.com")
+   .Get("/users/1")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }")
+   .Times(3);
+```
+
+### Specifying content type
+
+If a content type is defined on a Nock then the request content type will be used for matching
+
+```c#
+var nock = new Nock("http://domain.com")
+   .Get("/users/1")
+   .ContentType("application/json")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }")
+   .Times(3);
+```
+
+### Restoring
+
+You can remove any previously unused nocks like this:
+
+```c#
 Nock.ClearAll();
-
 ```
 
 content type
@@ -101,7 +147,21 @@ Returning specific test responses
 
 ## Expectations
 
-isDone
+You can determine whether a nock was called like this:
+
+```c#
+var nock = new Nock("http://domain.com")
+   .Get("/users/1")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }")
+
+....
+
+Assert.That(nock.Done(), Is.True);
+```
+
+
+
+a real example!!!!
 
 ## How does it work?
 
