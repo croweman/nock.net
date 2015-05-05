@@ -29,7 +29,7 @@ It came to life because of nock in the node js world.
 
 ## Install
 
-Either reference the Nock.net assembly or Install from nuget.
+Either reference the Nock.net assembly or Install from [nuget](https://www.nuget.org/packages/Nock.net/).
 
 ## Use
 
