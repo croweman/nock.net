@@ -4,6 +4,8 @@ Nock.net is an HTTP mocking library for .Net
 
 Nock.net can be used to aid in testing modules that perform HTTP requests in isolation.
 
+It came to life because of nock in the node js world.
+
 ## Table of contents
 
 - [Install](#install)  
@@ -15,7 +17,8 @@ Nock.net can be used to aid in testing modules that perform HTTP requests in iso
     - [Specifying request headers](#specifying-request-headers)
     - [Specifying reply headers](#specifying-reply-headers)
   - [Specifying content type](#specifying-content-type)
-  - [Repeat response n times](#repeat-response-n-times) 
+  - [Repeat response n times](#repeat-response-n-times)
+  - [Real world](#real-world)
 - [Expectations](#expectations)  
 - [Restoring](#restoring)  
 - [How does it work?](#how-does-it-work)  
@@ -110,17 +113,6 @@ var nock = new Nock("http://domain.com")
    .Reply(HttpStatusCode.OK, "{ value: 5 }", responseHeaders);
 ```
 
-### Repeat response n times
-
-You are able to specify the number of times to repeat the same response.
-
-```c#
-var nock = new Nock("http://domain.com")
-   .Get("/users/1")
-   .Reply(HttpStatusCode.OK, "{ value: 5 }")
-   .Times(3);
-```
-
 ### Specifying content type
 
 If a content type is defined on a Nock then the request content type will be used for matching
@@ -133,6 +125,17 @@ var nock = new Nock("http://domain.com")
    .Times(3);
 ```
 
+### Repeat response n times
+
+You are able to specify the number of times to repeat the same response.
+
+```c#
+var nock = new Nock("http://domain.com")
+   .Get("/users/1")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }")
+   .Times(3);
+```
+
 ### Restoring
 
 You can remove any previously unused nocks like this:
@@ -140,10 +143,6 @@ You can remove any previously unused nocks like this:
 ```c#
 Nock.ClearAll();
 ```
-
-content type
-
-Returning specific test responses
 
 ## Expectations
 
@@ -159,9 +158,130 @@ var nock = new Nock("http://domain.com")
 Assert.That(nock.Done(), Is.True);
 ```
 
+### Real world
 
+Below is a real world usage sample with implemented code and test.
 
-a real example!!!!
+```c#
+[TestCase(HttpStatusCode.OK, "Added", Status.OK)]
+[TestCase(HttpStatusCode.OK, "User not allowed", Status.Forbidden)]
+[TestCase(HttpStatusCode.OK, "User could not be found", Status.NotFound)]
+[TestCase(HttpStatusCode.ServiceUnavailable, "Something went wrong", Status.Error)]
+[TestCase(null, "WebException", Status.Error)]
+[Test]
+public void NockingAResponseCorrectlyReturnsRelevantResponses(HttpStatusCode? statusCode, string resultMessage, Status expectedStatus)
+{
+var responseJson = string.Format("{{ result: \"{0}\" }}", resultMessage);
+
+if (resultMessage == "WebException")
+{
+new Nock("https://domain-name.com")
+.ContentType("application/json; encoding='utf-8'")
+.Post("/api/v2/action/")
+.Reply(new WebException("This is a web exception"));
+}
+else
+{
+new Nock("https://domain-name.com")
+.ContentType("application/json; encoding='utf-8'")
+.Post("/api/v2/action/")
+.Reply(HttpStatusCode.OK, responseJson);                
+}
+
+var status = PostDataToAnEndpointAndProcessTheResponse();
+
+Assert.That(status, Is.EqualTo(expectedStatus));
+
+}
+        
+public enum Status
+{
+OK,
+Forbidden,
+NotFound,
+Error
+}
+
+public class ResponseModel
+{
+public string Result { get; set; }
+}
+
+public Status PostDataToAnEndpointAndProcessTheResponse()
+{
+var status = Status.OK;
+
+var postData =
+"{" +
+"Action: \"AddFunds\"," +
+"FirstName: \"Joe\"," +
+"Surname: \"Bloggs\"" +
+"Amount: 50.95" + 
+"}";
+
+var bytes = Encoding.UTF8.GetBytes(postData);
+
+var request = HttpWebRequest.CreateRequest("https://domain-name.com/api/v2/action/");
+request.ContentType = "application/json; encoding='utf-8'";
+request.ContentLength = bytes.Length;
+request.Method = "POST";
+
+using (var requestStream = request.GetRequestStream())
+{
+requestStream.Write(bytes, 0, bytes.Length);
+requestStream.Close();
+}
+
+IHttpWebResponse response = null;
+
+try
+{
+response = request.GetResponse();
+
+if (response.StatusCode == HttpStatusCode.OK)
+{
+var body = string.Empty;
+
+using (var reader = new StreamReader(response.GetResponseStream(), true))
+{
+body = reader.ReadToEnd();
+}
+
+var model = JsonConvert.DeserializeObject<ResponseModel>(body);
+
+switch (model.Result)
+{
+case "Added":
+status = Status.OK;
+break;
+case "User not allowed":
+status = Status.Forbidden;
+break;
+case "User could not be found":
+status = Status.NotFound;
+break;
+default:
+status = Status.Error;
+break;
+}
+}
+else
+status = Status.Error;
+   
+}
+catch (Exception)
+{
+status = Status.Error;
+}
+finally
+{
+if (response != null)
+response.Dispose();
+}
+
+return status;
+}
+```
 
 ## How does it work?
 
