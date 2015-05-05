@@ -53,7 +53,7 @@ You would then need implementation logic that would Create a Nock.net.HttpWebReq
 Nock.net.HttpWebRequest request = Nock.net.HttpWebRequest.CreateRequest("https://domain.com/users/1");
 request.Method = "GET";
 
-Nock.net.IHttpWebResponse response = request.GetResponse();;
+Nock.net.IHttpWebResponse response = request.GetResponse();
 ```
 
 Nock.net.HttpWebRequest and Nock.netHttpWebResponse objects are wrappers over the System.Net.HttpWebResponse and System.Net.HttpWebRequest objects.
