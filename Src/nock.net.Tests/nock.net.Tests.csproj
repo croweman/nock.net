@@ -6,8 +6,8 @@
     <ProjectGuid>{7A7B3778-54A0-456E-90EC-E1612C5991EE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>nock.net.Tests</RootNamespace>
-    <AssemblyName>nock.net.Tests</AssemblyName>
+    <RootNamespace>Nock.net.Tests</RootNamespace>
+    <AssemblyName>Nock.net.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

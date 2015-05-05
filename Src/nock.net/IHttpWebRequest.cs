@@ -4,7 +4,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 
-namespace nock.net
+namespace Nock.net
 {
     public interface IHttpWebRequest
     {

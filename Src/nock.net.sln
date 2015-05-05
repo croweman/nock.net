@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nock.net", "nock.net\nock.net.csproj", "{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nock.net", "Nock.net\Nock.net.csproj", "{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "nock.net.Tests", "nock.net.Tests\nock.net.Tests.csproj", "{7A7B3778-54A0-456E-90EC-E1612C5991EE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Nock.net.Tests", "Nock.net.Tests\Nock.net.Tests.csproj", "{7A7B3778-54A0-456E-90EC-E1612C5991EE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace nock.net
+namespace Nock.net
 {
     internal class ResponseHelper
     {
@@ -40,7 +40,13 @@ namespace nock.net
             return null;
         }
 
-        public static TestHttpWebResponse BuildNockHttpWebResponse(ResponseDetail responseDetail)
+        public static TestHttpWebResponse FindAndBuildTestHttpWebResponse(HttpWebRequest request)
+        {
+            var responseDetail = FindTestHttpWebResponse(request);
+            return responseDetail != null ? BuildNockHttpWebResponse(responseDetail) : null;
+        }
+
+        internal static TestHttpWebResponse BuildNockHttpWebResponse(ResponseDetail responseDetail)
         {
             if (responseDetail.TestHttpWebResponse != null)
                 return responseDetail.TestHttpWebResponse;

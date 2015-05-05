@@ -7,8 +7,8 @@
     <ProjectGuid>{FAB00F93-6747-4F69-AFB0-3E15EFF770B4}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>nock.net</RootNamespace>
-    <AssemblyName>nock.net</AssemblyName>
+    <RootNamespace>Nock.net</RootNamespace>
+    <AssemblyName>Nock.net</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

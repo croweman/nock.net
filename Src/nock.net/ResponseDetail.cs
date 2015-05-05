@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 
-namespace nock.net
+namespace Nock.net
 {
     internal class ResponseDetail
     {

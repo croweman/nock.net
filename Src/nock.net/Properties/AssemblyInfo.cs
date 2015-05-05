@@ -14,4 +14,4 @@ using System.Runtime.InteropServices;
 [assembly: Guid("e26f22f6-ccf4-46b5-afc3-ae2140d8163d")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
-[assembly: InternalsVisibleTo("nock.net.Tests")]
+[assembly: InternalsVisibleTo("Nock.net.Tests")]

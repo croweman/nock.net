@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net;
 
-namespace nock.net
+namespace Nock.net
 {
     public class HttpWebResponse : IHttpWebResponse, IDisposable
     {

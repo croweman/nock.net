@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 
-namespace nock.net
+namespace Nock.net
 {
     public sealed class Nock
     {
