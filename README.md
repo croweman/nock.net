@@ -1,9 +1,16 @@
 # Nock.net
 
-
 Nock.net is an HTTP mocking library for .Net
 
 Nock.net can be used to aid in testing modules that perform HTTP requests in isolation.
+
+## Table of contents
+
+**[Install](#install)**  
+**[Use](#use)**
+**[How does it work?](#how-does-it-work)** 
+**[License](#license)**  
+
 
 ## Install
 
@@ -12,11 +19,18 @@ Either reference the Nock.net assembly or Install from nuget.
 ## Use
 
 
-```C#
+```c#
 
-```C#
+Nock.ClearAll();
+
+```
+
+## How does it work?
+
+blah blah it provides wrapper over request and response and used interfaces etc
 
 ## License
+
 (The MIT License)
 
 Copyright (c) 2011-2015 Pedro Teixeira. http://about.me/pedroteixeira
