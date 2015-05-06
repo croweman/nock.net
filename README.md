@@ -41,7 +41,7 @@ using Nock.net;
 [Test]
 public void Test()
 {
-    var nock = new Nock("http://domain.com")
+    var nock = new Nocker("http://domain.com")
         .Get("/users/1")
         .Reply(HttpStatusCode.OK, "{ value: 5 }");
 }
@@ -56,26 +56,26 @@ request.Method = "GET";
 Nock.net.IHttpWebResponse response = request.GetResponse();
 ```
 
-Nock.net.HttpWebRequest and Nock.netHttpWebResponse objects are wrappers over the System.Net.HttpWebResponse and System.Net.HttpWebRequest objects.
+Nock.net.HttpWebRequest and Nock.net.HttpWebResponse objects are wrappers over the System.Net.HttpWebResponse and System.Net.HttpWebRequest objects.
 
 ### Specifying request body
 
 You can specify the request body to be matched as the second argument to the Get, Post, Put or Delete specifications like this:
 
 ```c#
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
     .Get("/users/1", "{ add: \"1 + 4\" }")
     .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
 
-If no request body is defined on the Nock then the body will not be used for matching
+If no request body is defined on the Nocker then the body will not be used for matching
 
 ### Replying with exceptions
 
 You can reply with an exception like this:
 
 ```c#
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
     .Get("/users/1")
     .Reply(new WebException("An unexpected exception occurred"));
 ```
@@ -90,7 +90,7 @@ var response = new TestHttpWebResponse("The body")
     CharacterSet = "blah"
 };
 
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
     .Get("/users/1")
     .Reply(response);
 ```
@@ -106,7 +106,7 @@ You can specify the request headers to be matched against like this:
 ```c#
 var webHeaders = new WebHeaderCollection { { "x-custom", "value" } };
 
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
    .Get("/users/1")
    .RequestHeaders(webHeaders)
    .Reply(HttpStatusCode.OK, "{ value: 5 }");
@@ -121,7 +121,7 @@ You can specify the reply headers like this:
 ```c#
 var reponseHeaders = new WebHeaderCollection { { "x-custom", "value" } };
 
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }", responseHeaders);
 ```
@@ -131,7 +131,7 @@ var nock = new Nock("http://domain.com")
 If a content type is defined on a Nock then the request content type will be used for matching
 
 ```c#
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
    .Get("/users/1")
    .ContentType("application/json")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
@@ -143,7 +143,7 @@ var nock = new Nock("http://domain.com")
 You are able to specify the number of times to repeat the same response.
 
 ```c#
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
    .Times(3);
@@ -154,7 +154,7 @@ var nock = new Nock("http://domain.com")
 You can remove any previously unused nocks like this:
 
 ```c#
-Nock.ClearAll();
+Nocker.ClearAll();
 ```
 
 ## Expectations
@@ -162,7 +162,7 @@ Nock.ClearAll();
 You can determine whether a nock was called like this:
 
 ```c#
-var nock = new Nock("http://domain.com")
+var nock = new Nocker("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
 
@@ -188,14 +188,14 @@ public void NockingAResponseCorrectlyReturnsRelevantResponses(HttpStatusCode? st
 
    if (resultMessage == "WebException")
    {
-      new Nock("https://domain-name.com")
+      new Nocker("https://domain-name.com")
          .ContentType("application/json; encoding='utf-8'")
          .Post("/api/v2/action/")
          .Reply(new WebException("This is a web exception"));
    }
    else
    {
-      new Nock("https://domain-name.com")
+      new Nocker("https://domain-name.com")
          .ContentType("application/json; encoding='utf-8'")
          .Post("/api/v2/action/")
          .Reply(HttpStatusCode.OK, responseJson);                
@@ -281,8 +281,9 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
       else
          status = Status.Error;
    }
-   catch (Exception)
+   catch (WebException ex)
    {
+      var errorMessage = string.Format("An error occurred: {0}, Http status code: {1}", ex.Message, ex.Response.Headers["Status-Code"]);
       status = Status.Error;
    }
    finally
@@ -296,9 +297,9 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
 ```
 ## How does it work?
 
-The Nock assembly provides wrapper objects over the standard System.Net HttpWebResponse and HttpWebRequest objects.
+The Nock.net assembly provides wrapper objects over the standard System.Net HttpWebResponse and HttpWebRequest objects.
 
-When Nocks have been created in your tests then relevant Nock.net.TestHttpWebResponse objects will be returned, these objects implement the Nock.net.IHttpWebResponse interface.
+When Nockers have been created in your tests then relevant Nock.net.TestHttpWebResponse objects will be returned, these objects implement the Nock.net.IHttpWebResponse interface.
 
 ## License
 
