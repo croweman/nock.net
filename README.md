@@ -283,8 +283,7 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
    }
    catch (WebException ex)
    {
-      var errorResponse = ex.Response as HttpWebResponse;
-      var errorMessage = string.Format("An error occurred: {0}, Http status code: {1}", ex.Message, errorResponse != null ? errorResponse.StatusCode.ToString() : "Unknown");
+      var errorMessage = string.Format("An error occurred: {0}, Http status code: {1}", ex.Message, ex.Response.Headers["Status-Code"]);
       status = Status.Error;
    }
    finally
