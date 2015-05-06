@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json;
@@ -61,10 +60,13 @@ namespace Nock.net.Tests
 
             if (resultMessage == "WebException")
             {
+                var testHttpWebResponse = new CustomHttpWebResponse();
+                testHttpWebResponse.Headers.Add("Status-Code", "403");
+
                 new Nocker("https://domain-name.com")
                     .ContentType("application/json; encoding='utf-8'")
                     .Post("/api/v2/action/")
-                    .Reply(new WebException("This is a web exception"));
+                    .Reply(new WebException("This is a web exception", null, WebExceptionStatus.UnknownError, testHttpWebResponse));
             }
             else
             {
@@ -74,28 +76,23 @@ namespace Nock.net.Tests
                     .Reply(HttpStatusCode.OK, responseJson);                
             }
 
-            var status = PostDataToAnEndpointAndProcessTheResponse();
+            var postData = PostDataToAnEndpointAndProcessTheResponse();
 
-            Assert.That(status, Is.EqualTo(expectedStatus));
+            Assert.That(postData.Status, Is.EqualTo(expectedStatus));
+
+            if (resultMessage == "WebException")
+            {
+                Assert.That(postData.ErrorMessage, Is.EqualTo("An error occurred: This is a web exception. Http status code: 403"));
+            }
 
         }
-        
-        public enum Status
-        {
-            OK,
-            Forbidden,
-            NotFound,
-            Error
-        }
 
-        public class ResponseModel
+        public PostResult PostDataToAnEndpointAndProcessTheResponse()
         {
-            public string Result { get; set; }
-        }
-
-        public Status PostDataToAnEndpointAndProcessTheResponse()
-        {
-            var status = Status.OK;
+            var postResult = new PostResult
+            {
+                Status = Status.OK
+            };
 
             var postData =
                 "{" +
@@ -138,26 +135,33 @@ namespace Nock.net.Tests
                     switch (model.Result)
                     {
                         case "Added":
-                            status = Status.OK;
+                            postResult.Status = Status.OK;
                             break;
                         case "User not allowed":
-                            status = Status.Forbidden;
+                            postResult.Status = Status.Forbidden;
                             break;
                         case "User could not be found":
-                            status = Status.NotFound;
+                            postResult.Status = Status.NotFound;
                             break;
                         default:
-                            status = Status.Error;
+                            postResult.Status = Status.Error;
                             break;
                     }
                 }
                 else
-                    status = Status.Error;
+                    postResult.Status = Status.Error;
    
             }
-            catch (Exception)
+            catch (WebException ex)
             {
-                status = Status.Error;
+                postResult.Status = Status.Error;
+
+                var statusCode = "Unknown";
+
+                if (ex.Response != null)
+                    statusCode = ex.Response.Headers["Status-Code"];
+
+                postResult.ErrorMessage = string.Format("An error occurred: {0}. Http status code: {1}", ex.Message, statusCode);
             }
             finally
             {
@@ -165,7 +169,39 @@ namespace Nock.net.Tests
                     response.Dispose();
             }
 
-            return status;
+            return postResult;
+        }
+
+        public enum Status
+        {
+            OK,
+            Forbidden,
+            NotFound,
+            Error
+        }
+
+        public class ResponseModel
+        {
+            public string Result { get; set; }
+        }
+
+        public class CustomHttpWebResponse : WebResponse
+        {
+            private readonly WebHeaderCollection _headers = new WebHeaderCollection();
+
+            public override WebHeaderCollection Headers
+            {
+                get
+                {
+                    return _headers;
+                }
+            }
+        }
+
+        public class PostResult
+        {
+            public Status Status { get; set; }
+            public string ErrorMessage { get; set; }
         }
     }
 }
