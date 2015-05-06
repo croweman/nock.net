@@ -42,7 +42,7 @@
     <Compile Include="CustomMemoryStream.cs" />
     <Compile Include="IHttpWebRequest.cs" />
     <Compile Include="IHttpWebResponse.cs" />
-    <Compile Include="Nock.cs" />
+    <Compile Include="Nocker.cs" />
     <Compile Include="HttpWebResponse.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="HttpWebRequest.cs" />

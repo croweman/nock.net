@@ -5,7 +5,7 @@ namespace Nock.net
 {
     internal class ResponseDetail
     {
-        public Nock.Method Method { get; private set; }
+        public Nocker.Method Method { get; private set; }
         public string Url { get; private set; }
         public string Path { get; private set; }
         public string Response { get; private set; }
@@ -19,7 +19,7 @@ namespace Nock.net
         public bool IsDone { get; set; }
 
         public ResponseDetail(string url, string path, string response, HttpStatusCode statusCode,
-            Nock.Method method, WebHeaderCollection headers, Exception exception, string contentType,
+            Nocker.Method method, WebHeaderCollection headers, Exception exception, string contentType,
             TestHttpWebResponse testHttpWebResponse, string body, WebHeaderCollection requestHeaders)
         {
             Url = url;

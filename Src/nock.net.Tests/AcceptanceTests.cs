@@ -14,13 +14,13 @@ namespace Nock.net.Tests
         [SetUp]
         public void SetUp()
         {
-            Nock.ClearAll();
+            Nocker.ClearAll();
         }
 
         [Test]
         public void CallingDoneOnANockReturnsFalseIfTheNockResponseWasNotUsed()
         {
-            var nock = new Nock("https://domain-name.com")
+            var nock = new Nocker("https://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/api/v2/action/")
                 .Reply(HttpStatusCode.OK, "The body");
@@ -35,7 +35,7 @@ namespace Nock.net.Tests
         [Test]
         public void CallingDoneOnANockReturnsTrueIfTheNockResponseWasUsed()
         {
-            var nock = new Nock("https://domain-name.com")
+            var nock = new Nocker("https://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/api/v2/action/")
                 .Reply(HttpStatusCode.OK, "The body");
@@ -61,14 +61,14 @@ namespace Nock.net.Tests
 
             if (resultMessage == "WebException")
             {
-                new Nock("https://domain-name.com")
+                new Nocker("https://domain-name.com")
                     .ContentType("application/json; encoding='utf-8'")
                     .Post("/api/v2/action/")
                     .Reply(new WebException("This is a web exception"));
             }
             else
             {
-                new Nock("https://domain-name.com")
+                new Nocker("https://domain-name.com")
                     .ContentType("application/json; encoding='utf-8'")
                     .Post("/api/v2/action/")
                     .Reply(HttpStatusCode.OK, responseJson);                

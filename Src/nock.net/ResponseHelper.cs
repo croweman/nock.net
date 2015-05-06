@@ -11,7 +11,7 @@ namespace Nock.net
 
         public static ResponseDetail FindTestHttpWebResponse(HttpWebRequest request, bool remove = true, bool findingForRequest = false)
         {
-            if (!Nock.Testing || Nock.ResponseDetails.Count == 0)
+            if (!Nocker.Testing || Nocker.ResponseDetails.Count == 0)
                 return null;
 
             lock (LockObject)
@@ -20,7 +20,7 @@ namespace Nock.net
                 var method = request.Method.ToUpper();
                 var contentType = request.ContentType;
 
-                foreach (var responseDetail in Nock.ResponseDetails)
+                foreach (var responseDetail in Nocker.ResponseDetails)
                 {
                     var fullUrl = responseDetail.Url + responseDetail.Path;
 
@@ -47,7 +47,7 @@ namespace Nock.net
                     if (remove)
                     {
                         responseDetail.IsDone = true;
-                        Nock.ResponseDetails.Remove(responseDetail);
+                        Nocker.ResponseDetails.Remove(responseDetail);
                     }
 
                     return responseDetail;

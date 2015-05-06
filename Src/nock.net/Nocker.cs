@@ -4,7 +4,7 @@ using System.Net;
 
 namespace Nock.net
 {
-    public sealed class Nock
+    public sealed class Nocker
     {
 
         internal static readonly List<ResponseDetail> ResponseDetails = new List<ResponseDetail>();
@@ -31,7 +31,7 @@ namespace Nock.net
             MERGE
         }
 
-        public Nock(string url)
+        public Nocker(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentException("Url must be defined");
@@ -43,7 +43,7 @@ namespace Nock.net
             Testing = true;
         }
 
-        private Nock SetMethod(string path, Method method, string body = null)
+        private Nocker SetMethod(string path, Method method, string body = null)
         {
             if (string.IsNullOrWhiteSpace(path))
                 throw new ArgumentException("Path must be defined");
@@ -58,42 +58,42 @@ namespace Nock.net
             return this;
         }
 
-        public Nock Get(string path, string body = null)
+        public Nocker Get(string path, string body = null)
         {
             return SetMethod(path, Method.GET, body);
         }
 
-        public Nock Post(string path, string body = null)
+        public Nocker Post(string path, string body = null)
         {
             return SetMethod(path, Method.POST, body);
         }
 
-        public Nock Put(string path, string body = null)
+        public Nocker Put(string path, string body = null)
         {
             return SetMethod(path, Method.PUT, body);
         }
 
-        public Nock Delete(string path, string body = null)
+        public Nocker Delete(string path, string body = null)
         {
             return SetMethod(path, Method.DELETE, body);
         }
 
-        public Nock Head(string path)
+        public Nocker Head(string path)
         {
             return SetMethod(path, Method.HEAD);
         }
 
-        public Nock Patch(string path)
+        public Nocker Patch(string path)
         {
             return SetMethod(path, Method.PATCH);
         }
 
-        public Nock Merge(string path)
+        public Nocker Merge(string path)
         {
             return SetMethod(path, Method.MERGE);
         }
 
-        public Nock ContentType(string contentType)
+        public Nocker ContentType(string contentType)
         {
             if (string.IsNullOrEmpty(contentType))
                 throw new ArgumentException("Content type must be defined");
@@ -102,7 +102,7 @@ namespace Nock.net
             return this;
         }
 
-        public Nock Reply(HttpStatusCode statusCode, string response, WebHeaderCollection headers = null)
+        public Nocker Reply(HttpStatusCode statusCode, string response, WebHeaderCollection headers = null)
         {
             if (_built)
                 throw new Exception("The nock has already been built");
@@ -123,7 +123,7 @@ namespace Nock.net
             return this;
         }
 
-        public Nock Reply<T>(T exception) where T : Exception
+        public Nocker Reply<T>(T exception) where T : Exception
         {
             if (_built)
                 throw new Exception("The nock has already been built");
@@ -141,7 +141,7 @@ namespace Nock.net
             return this;
         }
 
-        public Nock Reply(TestHttpWebResponse testHttpWebResponse)
+        public Nocker Reply(TestHttpWebResponse testHttpWebResponse)
         {
             if (_built)
                 throw new Exception("The nock has already been built");
@@ -159,7 +159,7 @@ namespace Nock.net
             return this;
         }
 
-        public Nock RequestHeaders(WebHeaderCollection headers)
+        public Nocker RequestHeaders(WebHeaderCollection headers)
         {
             if (headers == null)
                 throw new ArgumentException("Request headers must be defined");
