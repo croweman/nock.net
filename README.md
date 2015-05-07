@@ -188,10 +188,13 @@ public void NockingAResponseCorrectlyReturnsRelevantResponses(HttpStatusCode? st
 
    if (resultMessage == "WebException")
    {
+      var testHttpWebResponse = new CustomHttpWebResponse();
+      testHttpWebResponse.Headers.Add("Status-Code", "403");
+      
       new Nocker("https://domain-name.com")
          .ContentType("application/json; encoding='utf-8'")
          .Post("/api/v2/action/")
-         .Reply(new WebException("This is a web exception"));
+         .Reply(new WebException("This is a web exception", null, WebExceptionStatus.UnknownError, testHttpWebResponse));
    }
    else
    {
@@ -293,6 +296,19 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
    }
 
    return status;
+}
+
+public class CustomHttpWebResponse : WebResponse
+{
+   private readonly WebHeaderCollection _headers = new WebHeaderCollection();
+
+   public override WebHeaderCollection Headers
+   {
+      get
+      {
+        return _headers;
+      }
+   }
 }
 ```
 ## How does it work?
