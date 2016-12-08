@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -39,16 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CustomMemoryStream.cs" />
-    <Compile Include="IHttpWebRequest.cs" />
-    <Compile Include="IHttpWebResponse.cs" />
-    <Compile Include="Nocker.cs" />
-    <Compile Include="HttpWebResponse.cs" />
+    <Compile Include="Enums.cs" />
+    <Compile Include="Nock.cs" />
+    <Compile Include="NockHttpWebResponse.cs" />
+    <Compile Include="NockMatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="HttpWebRequest.cs" />
-    <Compile Include="ResponseDetail.cs" />
-    <Compile Include="ResponseHelper.cs" />
-    <Compile Include="TestHttpWebResponse.cs" />
+    <Compile Include="NockedRequest.cs" />
+    <Compile Include="RequestMatcher.cs" />
+    <Compile Include="Listener.cs" />
+    <Compile Include="NockHttpWebRequest.cs" />
+    <Compile Include="UrlMatcher.cs" />
+    <Compile Include="WebResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="_CreateNewNuGetPackage\DoNotModify\NuGet.exe" />
@@ -60,6 +65,9 @@
     <None Include="_CreateNewNuGetPackage\DoNotModify\New-NuGetPackage.ps1" />
     <None Include="_CreateNewNuGetPackage\DoNotModify\UploadNuGetPackage.ps1" />
     <None Include="_CreateNewNuGetPackage\RunMeToUploadNuGetPackage.cmd" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="TODO.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

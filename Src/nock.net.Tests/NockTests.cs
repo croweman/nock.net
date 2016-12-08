@@ -2,9 +2,15 @@
 using System.Linq;
 using System.Net;
 using NUnit.Framework;
+using System.Collections.Specialized;
 
 namespace Nock.net.Tests
 {
+    public class Fish
+    {
+        public int Eyes { get; set; }
+    }
+
     [TestFixture]
     public class NockTests
     {
@@ -12,7 +18,37 @@ namespace Nock.net.Tests
         [SetUp]
         public void SetUp()
         {
-            Nocker.ClearAll();
+            nock.ClearAll();
+        }
+
+        private bool FilterStringNonStatic(string body)
+        {
+            return true;
+        }
+
+        private static bool FilterStringStatic(string body)
+        {
+            return true;
+        }
+
+        private bool FilterTypedNonStatic(Fish fish)
+        {
+            return true;
+        }
+
+        private static bool FilterTypedStatic(Fish fish)
+        {
+            return true;
+        }
+
+        private bool FilterHeadersNonStatic(NameValueCollection headers)
+        {
+            return true;
+        }
+
+        private static bool FilterHeadersStatic(NameValueCollection headers)
+        {
+            return true;
         }
 
         #region Object creation tests
@@ -23,7 +59,7 @@ namespace Nock.net.Tests
         [Test]
         public void WhenCreatingANockAnExceptionWillBeThrownIfUrlIsInvalid(string url, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker(url));
+            var exception = Assert.Catch<ArgumentException>(() => new nock(url));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -37,7 +73,7 @@ namespace Nock.net.Tests
         [Test]
         public void GetWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Get(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -47,8 +83,34 @@ namespace Nock.net.Tests
         [Test]
         public void PostWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Post(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Post(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
+        }
+
+        [Test]
+        public void PostWillThrowAnExeptionIfStringTypeBodyMatcherFunctionIsDefinedWhichIsNotStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Post("/Test", FilterStringNonStatic));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void PostWillNotThrowAnExeptionIfStringTypeBodyMatcherFunctionIsDefinedWhichIsStatic()
+        {
+            var nock = new nock("http://www.google.co.uk").Post("/Test", FilterStringStatic);
+        }
+
+        [Test]
+        public void PostWillThrowAnExeptionIfCustomTypeBodyMatcherFunctionIsDefinedWhichIsNotStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Post<Fish>("/Test", FilterTypedNonStatic));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void PostWillNotThrowAnExeptionIfCustomTypeBodyMatcherFunctionIsDefinedWhichIsStatic()
+        {
+            var nock = new nock("http://www.google.co.uk").Post<Fish>("/Test", FilterTypedStatic);
         }
 
         [TestCase(null, "Path must be defined")]
@@ -57,8 +119,34 @@ namespace Nock.net.Tests
         [Test]
         public void PutWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Put(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Put(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
+        }
+
+        [Test]
+        public void PutWillThrowAnExeptionIfStringTypeBodyMatcherFunctionIsDefinedWhichIsNotStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Put("/Test", FilterStringNonStatic));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void PutWillNotThrowAnExeptionIfStringTypeBodyMatcherFunctionIsDefinedWhichIsStatic()
+        {
+            var nock = new nock("http://www.google.co.uk").Put("/Test", FilterStringStatic);
+        }
+
+        [Test]
+        public void PutWillThrowAnExeptionIfCustomTypeBodyMatcherFunctionIsDefinedWhichIsNotStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Put<Fish>("/Test", FilterTypedNonStatic));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void PutWillNotThrowAnExeptionIfCustomTypeBodyMatcherFunctionIsDefinedWhichIsStatic()
+        {
+            var nock = new nock("http://www.google.co.uk").Put<Fish>("/Test", FilterTypedStatic);
         }
 
         [TestCase(null, "Path must be defined")]
@@ -67,7 +155,7 @@ namespace Nock.net.Tests
         [Test]
         public void DeleteWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Delete(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Delete(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -77,7 +165,7 @@ namespace Nock.net.Tests
         [Test]
         public void HeadWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Head(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Head(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -87,7 +175,7 @@ namespace Nock.net.Tests
         [Test]
         public void PatchWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Patch(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Patch(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -97,7 +185,7 @@ namespace Nock.net.Tests
         [Test]
         public void MergeWillThrowAnExceptionIsPathIsInvalid(string path, string exceptionMessage)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Merge(path));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Merge(path));
             Assert.That(exception.Message, Is.EqualTo(exceptionMessage));
         }
 
@@ -106,29 +194,82 @@ namespace Nock.net.Tests
         #region Content type tests
 
         [TestCase(null)]
-        [TestCase("")]
         [Test]
         public void ContentTypeWillThrowAnExceptionIsContentTypeIsInvalid(string contentType)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Get("/").ContentType(contentType));
-            Assert.That(exception.Message, Is.EqualTo("Content type must be defined"));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").ContentType(contentType));
+            Assert.That(exception.Message, Is.EqualTo("Header value must be defined"));
         }
 
         #endregion Content type tests
+
+        #region Set tests
+
+        [TestCase(null, null, "Header name must be defined")]
+        [TestCase("", null, "Header name must be defined")]
+        [TestCase("Cheese", null, "Header value must be defined")]
+        [Test]
+        public void SetWillThrowAnExceptionIfSetIsInvalid(string headerName, string headerValue, string error)
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").MatchHeader(headerName, headerValue));
+            Assert.That(exception.Message, Is.EqualTo(error));
+        }
+
+        #endregion Set tests
+
+        #region Log tests
+
+        public void NonStaticLogger(string toLog)
+        {
+
+        }
+
+        public static void StaticLogger(string toLog)
+        {
+
+        }
+
+        [Test]
+        public void LogWillThrowAnExceptionIfLoggerIsNull()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").Log(null));
+            Assert.That(exception.Message, Is.EqualTo("A logger must be defined"));
+        }
+
+        [Test]
+        public void LogWillThrowAnExceptionIfLoggerIsNonStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").Log(NonStaticLogger));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void LogWillNotThrowAnExceptionIfLoggerIsStatic()
+        {
+            new nock("http://www.google.co.uk").Get("/").Log(StaticLogger);
+        }
+
+        [Test]
+        public void LogWillNotThrowAnExceptionIfLoggerIsAnInlineDelegateAction()
+        {
+            new nock("http://www.google.co.uk").Get("/").Log((value) => { });
+        }
+
+        #endregion Log tests
 
         #region Reply method tests
 
         [Test]
         public void ReplyWillThrowAnExceptionIfPathHasNotBeenDefined()
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Reply(HttpStatusCode.OK, ""));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Reply(HttpStatusCode.OK, ""));
             Assert.That(exception.Message, Is.EqualTo("Path must be defined"));
         }
 
         [Test]
         public void ReplyWillThrowAnExceptionIfNockHasAlreadyBeenBuilt()
         {
-            var nock = new Nocker("http://www.google.co.uk")
+            var nock = new nock("http://www.google.co.uk")
                 .Get("/")
                 .Reply(HttpStatusCode.OK, "");
 
@@ -137,53 +278,24 @@ namespace Nock.net.Tests
         }
 
         [Test]
-        public void ReplyWithExceptionWillThrowAnExceptionIfExceptionIsNotDefined()
+        public void ReplyWillThrowAnExceptionIfNullResponseCreatorIsDefined()
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Reply<WebException>(null));
-            Assert.That(exception.Message, Is.EqualTo("The exception must be defined"));
+            Func<string, NameValueCollection, string, WebResponse> blah = null;
+
+            var exception = Assert.Catch<Exception>(() => new nock("http://www.google.co.uk").Get("/").Reply(HttpStatusCode.OK, blah));
+            Assert.That(exception.Message, Is.EqualTo("Response creator function is invalid"));
+        }
+
+        private WebResponse Blah(string url, NameValueCollection headers, string body)
+        {
+            return null;
         }
 
         [Test]
-        public void ReplyWithExceptionWillThrowAnExceptionIfNockHasAlreadyBeenBuilt()
+        public void ReplyWillThrowAnExceptionIfNonStaticResponseCreatorIsDefined()
         {
-            var nock = new Nocker("http://www.google.co.uk")
-                .Get("/")
-                .Reply(HttpStatusCode.OK, "");
-
-            var exception = Assert.Catch<Exception>(() => nock.Reply<WebException>(null));
-            Assert.That(exception.Message, Is.EqualTo("The nock has already been built"));
-        }
-
-        [Test]
-        public void ReplyWithExceptionWillThrowAnExceptionIfPathIsNotDefined()
-        {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Reply<WebException>(new WebException()));
-            Assert.That(exception.Message, Is.EqualTo("Path must be defined"));
-        }
-
-        [Test]
-        public void ReplyWithTestNockHttpWebResponseWillThrowAnExceptionIfTestNockHttpWebResponseIsNotDefined()
-        {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Reply(null));
-            Assert.That(exception.Message, Is.EqualTo("The nock response must be defined"));
-        }
-
-        [Test]
-        public void ReplyWithTestNockHttpWebResponseWillThrowAnExceptionIfNockHasAlreadyBeenBuilt()
-        {
-            var nock = new Nocker("http://www.google.co.uk")
-                .Get("/")
-                .Reply(HttpStatusCode.OK, "");
-
-            var exception = Assert.Catch<Exception>(() => nock.Reply(null));
-            Assert.That(exception.Message, Is.EqualTo("The nock has already been built"));
-        }
-
-        [Test]
-        public void ReplyWithTestNockHttpWebResponseWillThrowAnExceptionIfPathIsNotDefined()
-        {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Reply(new TestHttpWebResponse(string.Empty)));
-            Assert.That(exception.Message, Is.EqualTo("Path must be defined"));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").Reply(HttpStatusCode.OK, Blah));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
         }
 
         #endregion Reply method tests 
@@ -191,10 +303,10 @@ namespace Nock.net.Tests
         #region Times method tests
 
         [Test]
-        public void TimesWillThrowAnExceptionIfNotHasNotBeenBuilt()
+        public void TimesWillThrowAnExceptionIfNockHasNotBeenBuilt()
         {
-            var exception = Assert.Catch<Exception>(() => new Nocker("http://www.google.co.uk").Times(2));
-            Assert.That(exception.Message, Is.EqualTo("You have not called a valid action method e.g. get, post and the Reply method"));
+            var exception = Assert.Catch<Exception>(() => new nock("http://www.google.co.uk").Times(2));
+            Assert.That(exception.Message, Is.EqualTo("You have not called a valid action method e.g. Get, Post and the Reply method"));
         }
 
         [TestCase(-1)]
@@ -203,7 +315,7 @@ namespace Nock.net.Tests
         [Test]
         public void TimesWillThrowAnExceptionIfTimesValueIsInvalid(int numberOfTimes)
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Get("/").Reply(HttpStatusCode.OK, "").Times(numberOfTimes));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").Reply(HttpStatusCode.OK, "").Times(numberOfTimes));
             Assert.That(exception.Message, Is.EqualTo("Number of times must be greater than 1"));
         }
 
@@ -214,8 +326,21 @@ namespace Nock.net.Tests
         [Test]
         public void RequestHeadersWillThrowAnExceptionIfRequestHeadersIsNull()
         {
-            var exception = Assert.Catch<ArgumentException>(() => new Nocker("http://www.google.co.uk").Get("/").RequestHeaders(null));
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").MatchHeaders((WebHeaderCollection)null));
             Assert.That(exception.Message, Is.EqualTo("Request headers must be defined"));
+        }
+
+        [Test]
+        public void RequestHeadersWillThrowAnExceptionIfRequestHeadersMatchingFuncIsNotStatic()
+        {
+            var exception = Assert.Catch<ArgumentException>(() => new nock("http://www.google.co.uk").Get("/").MatchHeaders(FilterHeadersNonStatic));
+            Assert.That(exception.Message, Is.EqualTo("The defined function is not static!"));
+        }
+
+        [Test]
+        public void RequestHeadersWillNotThrowAnExceptionIfRequestHeadersMatchingFuncIsStatic()
+        {
+            new nock("http://www.google.co.uk").Get("/").MatchHeaders(FilterHeadersStatic);
         }
 
         #endregion Request headers tests
@@ -223,319 +348,246 @@ namespace Nock.net.Tests
         #region General valid nock building tests
 
         [Test]
-        public void NockingAGetResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAGetResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
-            var requestHeaders = new WebHeaderCollection { { "Content-Type", "application/xml" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
+            var requestHeaders = new NameValueCollection { { "Content-Type", "application/xml" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Get("/test", "The body")
-                .RequestHeaders(requestHeaders)
-                .ContentType("application/json")
+                .MatchHeaders(requestHeaders)
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-            Assert.That(responseDetail.Body, Is.EqualTo("The body"));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.ContentType, Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.RequestHeaders.Count, Is.EqualTo(1));
-            Assert.That(responseDetail.RequestHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.RequestHeaders["Content-Type"], Is.EqualTo("application/xml"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.GET));
+            Assert.That(nockedRequest.Body, Is.EqualTo("The body"));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
+            Assert.That(nockedRequest.RequestHeaders.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.RequestHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.RequestHeaders["Content-Type"], Is.EqualTo("application/xml"));
         }
 
         [Test]
-        public void NockingAGetResponseCorrectlyBuildsResponseDetailObjectWhenNoContentTypeOrHeadersAreDefined()
+        public void NockingAGetResponseCorrectlyBuildsNockedRequestObjectWhenNoContentTypeOrHeadersAreDefined()
         {
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Get("/test")
                 .Reply(HttpStatusCode.Created, "<blah2>");
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.ContentType, Is.Null);
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(0));
-            Assert.That(responseDetail.RequestHeaders.Count, Is.EqualTo(0));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.GET));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(0));
+            Assert.That(nockedRequest.RequestHeaders.Count, Is.EqualTo(0));
         }
 
         [Test]
-        public void NockingAPostResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAGetResponseCorrectlyBuildsNockedRequestObjectWhenCustomHeadersAreSet()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
+            var requestHeaders = new NameValueCollection { { "Content-Type", "application/xml" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
+                .Get("/test", "The body")
+                .MatchHeaders(requestHeaders)
+                .MatchHeader("cheese", "please")
+                .Reply(HttpStatusCode.Created, "<blah2>", headers);
+
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
+
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.GET));
+            Assert.That(nockedRequest.Body, Is.EqualTo("The body"));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
+            Assert.That(nockedRequest.RequestHeaders.Count, Is.EqualTo(2));
+            Assert.That(nockedRequest.RequestHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.RequestHeaders["Content-Type"], Is.EqualTo("application/xml"));
+            Assert.That(nockedRequest.RequestHeaders.AllKeys[1], Is.EqualTo("cheese"));
+            Assert.That(nockedRequest.RequestHeaders["cheese"], Is.EqualTo("please"));
+        }
+
+        [Test]
+        public void NockingAPostResponseCorrectlyBuildsNockedRequestObject()
+        {
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
+
+            new nock("http://www.google.co.uk")
                 .Post("/test", "The body")
                 .Reply(HttpStatusCode.NotFound, "<blah>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.POST));
-            Assert.That(responseDetail.Body, Is.EqualTo("The body"));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.POST));
+            Assert.That(nockedRequest.Body, Is.EqualTo("The body"));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
         }
 
         [Test]
-        public void NockingAPutResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAPutResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "x-Custom", "asdfe" } };
+            var headers = new NameValueCollection { { "x-Custom", "asdfe" } };
 
-            new Nocker("http://www.anothergoogle.co.uk")
+            new nock("http://www.anothergoogle.co.uk")
                 .Put("/testing", "The body")
                 .Reply(HttpStatusCode.Accepted, "<blah>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.anothergoogle.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/testing"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.PUT));
-            Assert.That(responseDetail.Body, Is.EqualTo("The body"));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.anothergoogle.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/testing"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.PUT));
+            Assert.That(nockedRequest.Body, Is.EqualTo("The body"));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Accepted));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("x-Custom"));
-            Assert.That(responseDetail.Headers["x-custom"], Is.EqualTo("asdfe"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("x-Custom"));
+            Assert.That(nockedRequest.ResponseHeaders["x-custom"], Is.EqualTo("asdfe"));
         }
 
         [Test]
-        public void NockingADeleteResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingADeleteResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Delete("/test", "the body")
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.DELETE));
-            Assert.That(responseDetail.Body, Is.EqualTo("the body"));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.DELETE));
+            Assert.That(nockedRequest.Body, Is.EqualTo("the body"));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
         }
 
         [Test]
-        public void NockingAHeadResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAHeadResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Head("/test")
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.HEAD));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.HEAD));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
         }
 
         [Test]
-        public void NockingAPatchResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAPatchResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Patch("/test")
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.PATCH));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.PATCH));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
         }
 
         [Test]
-        public void NockingAMergeResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAMergeResponseCorrectlyBuildsNockedRequestObject()
         {
             var headers = new WebHeaderCollection { { "Content-Type", "application/xml" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Merge("/test")
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.MERGE));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.MERGE));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/xml"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/xml"));
         }
 
         [Test]
-        public void NockingAGetResponseWhichRepliesWithAStandardResponseCorrectlyBuildsResponseDetailObject()
+        public void NockingAGetResponseWhichRepliesWithAStandardResponseCorrectlyBuildsNockedRequestObject()
         {
-            var headers = new WebHeaderCollection { { "Content-Type", "application/json" } };
+            var headers = new NameValueCollection { { "Content-Type", "application/json" } };
 
-            new Nocker("http://www.google.co.uk")
+            new nock("http://www.google.co.uk")
                 .Get("/test")
                 .ContentType("application/json")
                 .Reply(HttpStatusCode.Created, "<blah2>", headers);
 
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
+            var nockedRequest = nock.NockedRequests.Last();
+            Assert.That(nockedRequest, Is.Not.Null);
 
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.Created));
-            Assert.That(responseDetail.ContentType, Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Response, Is.EqualTo("<blah2>"));
-            Assert.That(responseDetail.Headers.Count, Is.EqualTo(1));
+            Assert.That(nockedRequest.Url, Is.EqualTo("http://www.google.co.uk"));
+            Assert.That(nockedRequest.Path, Is.EqualTo("/test"));
+            Assert.That(nockedRequest.Method, Is.EqualTo(Method.GET));
+            Assert.That(nockedRequest.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(nockedRequest.Response, Is.EqualTo("<blah2>"));
+            Assert.That(nockedRequest.ResponseHeaders.Count, Is.EqualTo(1));
 
-            Assert.That(responseDetail.Headers.AllKeys[0], Is.EqualTo("Content-Type"));
-            Assert.That(responseDetail.Headers["Content-Type"], Is.EqualTo("application/json"));
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
-        }
-
-        [Test]
-        public void NockingAGetResponseWhichRepliesWithAnExceptionCorrectlyBuildsResponseDetailObject()
-        {
-            var webException = new WebException("This is an exception");
-
-            new Nocker("http://www.google.co.uk")
-                .Get("/test")
-                .ContentType("application/xml")
-                .Reply<WebException>(webException)
-                .Times(2);
-
-            Assert.That(Nocker.ResponseDetails.Count, Is.EqualTo(2));
-
-
-            foreach (var responseDetail in Nocker.ResponseDetails)
-            {
-                Assert.That(responseDetail, Is.Not.Null);
-
-                Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-                Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-                Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-                Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-                Assert.That(responseDetail.ContentType, Is.EqualTo("application/xml"));
-                Assert.That(responseDetail.Response, Is.EqualTo(string.Empty));
-                Assert.That(responseDetail.Headers, Is.Null);
-                Assert.That(responseDetail.Exception, Is.Not.Null);
-                Assert.That(responseDetail.Exception.Message, Is.EqualTo(webException.Message));
-                Assert.That(responseDetail.TestHttpWebResponse, Is.Null);
-            }
-
-        }
-
-        [Test]
-        public void NockingAGetResponseWhichRepliesWithATestNockHttpWebResponseCorrectlyBuildsResponseDetailObject()
-        {
-            var testNockHttpWebResponse = new TestHttpWebResponse("This is the response body");
-
-            new Nocker("http://www.google.co.uk")
-                .Get("/test")
-                .ContentType("application/txt")
-                .Reply(testNockHttpWebResponse);
-
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
-
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseDetail.ContentType, Is.EqualTo("application/txt"));
-            Assert.That(responseDetail.Response, Is.EqualTo(string.Empty));
-            Assert.That(responseDetail.Headers, Is.Null);
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Not.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.EqualTo(testNockHttpWebResponse));
-        }
-
-        [Test]
-        public void NockingAGetResponseWhichRepliesWithATestNockHttpWebResponseCorrectlyBuildsResponseDetailObjectTwoTimes()
-        {
-            var testNockHttpWebResponse = new TestHttpWebResponse("This is the response body");
-
-            new Nocker("http://www.google.co.uk")
-                .Get("/test")
-                .ContentType("application/txt")
-                .Reply(testNockHttpWebResponse);
-
-            var responseDetail = Nocker.ResponseDetails.Last();
-            Assert.That(responseDetail, Is.Not.Null);
-
-            Assert.That(responseDetail.Url, Is.EqualTo("http://www.google.co.uk"));
-            Assert.That(responseDetail.Path, Is.EqualTo("/test"));
-            Assert.That(responseDetail.Method, Is.EqualTo(Nocker.Method.GET));
-            Assert.That(responseDetail.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(responseDetail.ContentType, Is.EqualTo("application/txt"));
-            Assert.That(responseDetail.Response, Is.EqualTo(string.Empty));
-            Assert.That(responseDetail.Headers, Is.Null);
-            Assert.That(responseDetail.Exception, Is.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.Not.Null);
-            Assert.That(responseDetail.TestHttpWebResponse, Is.EqualTo(testNockHttpWebResponse));
+            Assert.That(nockedRequest.ResponseHeaders.AllKeys[0], Is.EqualTo("Content-Type"));
+            Assert.That(nockedRequest.ResponseHeaders["Content-Type"], Is.EqualTo("application/json"));
         }
 
         #endregion General valid nock building tests

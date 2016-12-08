@@ -41,7 +41,7 @@ using Nock.net;
 [Test]
 public void Test()
 {
-    var nock = new Nocker("http://domain.com")
+    var nock = new nock("http://domain.com")
         .Get("/users/1")
         .Reply(HttpStatusCode.OK, "{ value: 5 }");
 }
@@ -63,7 +63,7 @@ Nock.net.HttpWebRequest and Nock.net.HttpWebResponse objects are wrappers over t
 You can specify the request body to be matched as the second argument to the Get, Post, Put or Delete specifications like this:
 
 ```c#
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
     .Get("/users/1", "{ add: \"1 + 4\" }")
     .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
@@ -75,7 +75,7 @@ If no request body is defined on the Nocker then the body will not be used for m
 You can reply with an exception like this:
 
 ```c#
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
     .Get("/users/1")
     .Reply(new WebException("An unexpected exception occurred"));
 ```
@@ -90,7 +90,7 @@ var response = new TestHttpWebResponse("The body")
     CharacterSet = "blah"
 };
 
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
     .Get("/users/1")
     .Reply(response);
 ```
@@ -104,9 +104,9 @@ Header field names are case-insensitive
 You can specify the request headers to be matched against like this:
 
 ```c#
-var webHeaders = new WebHeaderCollection { { "x-custom", "value" } };
+var webHeaders = new NameValueCollection { { "x-custom", "value" } };
 
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
    .Get("/users/1")
    .RequestHeaders(webHeaders)
    .Reply(HttpStatusCode.OK, "{ value: 5 }");
@@ -119,9 +119,9 @@ If no request headers are defined on the Nock then the request headers will not 
 You can specify the reply headers like this:
 
 ```c#
-var reponseHeaders = new WebHeaderCollection { { "x-custom", "value" } };
+var reponseHeaders = new NameValueCollection { { "x-custom", "value" } };
 
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }", responseHeaders);
 ```
@@ -131,7 +131,7 @@ var nock = new Nocker("http://domain.com")
 If a content type is defined on a Nock then the request content type will be used for matching
 
 ```c#
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
    .Get("/users/1")
    .ContentType("application/json")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
@@ -143,7 +143,7 @@ var nock = new Nocker("http://domain.com")
 You are able to specify the number of times to repeat the same response.
 
 ```c#
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
    .Times(3);
@@ -162,7 +162,7 @@ Nocker.ClearAll();
 You can determine whether a nock was called like this:
 
 ```c#
-var nock = new Nocker("http://domain.com")
+var nock = new nock("http://domain.com")
    .Get("/users/1")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
 
@@ -191,14 +191,14 @@ public void NockingAResponseCorrectlyReturnsRelevantResponses(HttpStatusCode? st
       var testHttpWebResponse = new CustomHttpWebResponse();
       testHttpWebResponse.Headers.Add("Status-Code", "403");
       
-      new Nocker("https://domain-name.com")
+      new nock("https://domain-name.com")
          .ContentType("application/json; encoding='utf-8'")
          .Post("/api/v2/action/")
          .Reply(new WebException("This is a web exception", null, WebExceptionStatus.UnknownError, testHttpWebResponse));
    }
    else
    {
-      new Nocker("https://domain-name.com")
+      new nock("https://domain-name.com")
          .ContentType("application/json; encoding='utf-8'")
          .Post("/api/v2/action/")
          .Reply(HttpStatusCode.OK, responseJson);                
@@ -300,7 +300,7 @@ public Status PostDataToAnEndpointAndProcessTheResponse()
 
 public class CustomHttpWebResponse : WebResponse
 {
-   private readonly WebHeaderCollection _headers = new WebHeaderCollection();
+   private readonly NameValueCollection _headers = new NameValueCollection();
 
    public override WebHeaderCollection Headers
    {
