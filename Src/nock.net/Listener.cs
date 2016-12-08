@@ -142,15 +142,16 @@ namespace Nock.net
 
         private static NockHttpWebResponse GetResponse(HttpListenerRequest request)
         {
-            var headers = AddHeaders<NameValueCollection, WebHeaderCollection>(request.Headers, null);
+            //var headers = AddHeaders<NameValueCollection, WebHeaderCollection>(request.Headers, null);
+            var headers = request.Headers;
 
             var nockedMatch = RequestMatcher.FindNockedWebResponse(new NockHttpWebRequest()
             {
                 RequestUri = request.RawUrl,
                 Headers = headers,
-                //ContentType = request.ContentType,
                 Method = request.HttpMethod,
-                InputStream = request.InputStream
+                InputStream = request.InputStream,
+                Query = request.QueryString
             });
 
             NockHttpWebResponse response = new NockHttpWebResponse();
@@ -168,7 +169,14 @@ namespace Nock.net
                 {
                     try
                     {
-                        var createdResponse = nock.ResponseCreator(request.RawUrl, headers, nockedMatch.RequestedBody);
+                        var url = request.RawUrl;
+
+                        if (url.Contains("?"))
+                        {
+                            url = url.Substring(0, url.IndexOf("?"));
+                        }
+
+                        var createdResponse = nock.ResponseCreator(url, headers, request.QueryString, nockedMatch.RequestedBody);
 
                         response.Body = createdResponse.ResponseBody ?? string.Empty;
                         response.Headers = createdResponse.ResponseHeaders;

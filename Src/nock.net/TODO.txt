@@ -4,6 +4,12 @@
 RUN AS ADMIN
 
 
+More complex object for request creator url
+.Query (true, blah)
+
+// test query all variations
+// testing query func, remove query from request url and pass through on function, do the same on response creator????????????????????
+
 log stuff apart from exceptions when log or recorder on?
 
 log, rec, rec, stop?

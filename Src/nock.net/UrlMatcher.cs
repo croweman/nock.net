@@ -34,7 +34,22 @@ namespace Nock.net
             }
             else
             {
-                return string.Equals(nockUrl, requestUrl);
+                var nockContainsQuery = nockUrl.Contains("?");
+                var requestContainsQuery = requestUrl.Contains("?");
+
+                if (nockContainsQuery)
+                {
+                    return string.Equals(nockUrl, requestUrl);
+                }
+                else
+                {
+                    if (requestContainsQuery)
+                    {
+                        requestUrl = requestUrl.Substring(0, requestUrl.IndexOf("?"));
+                    }
+
+                    return string.Equals(nockUrl, requestUrl);
+                }
             }
         }
     }

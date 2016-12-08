@@ -240,7 +240,7 @@ namespace Nock.net.Tests
         }
 
         [Test]
-        public void FindNockedWebResponseReturnsAValidStandardTestHttpWebResponseObjectIfRequestAndNockRequestHeadersMatch()
+        public void FindNockedWebResponseReturnsAValidStandardWebResponseObjectIfRequestAndNockRequestHeadersMatch()
         {
             var requestHeaders = new NameValueCollection
             {
@@ -269,7 +269,166 @@ namespace Nock.net.Tests
             Assert.That(nock.NockedRequests.Count, Is.EqualTo(0));
         }
 
-    
+        [Test]
+        public void FindNockedWebResponseCorrectlyFiltersBasedOnQueryBool()
+        {
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query(false)
+                .Log(System.Console.WriteLine)
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            var request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=1";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "1" } };
+
+            var nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            var response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(1));
+
+            nock.ClearAll();
+
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query(true)
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=1";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "1" } };
+
+            nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FindNockedWebResponseCorrectlyFiltersBasedOnQueryFunc()
+        {
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query((url, query) =>
+                {
+                    return query["test"] == "2";
+                })
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            var request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=1";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "1" } };
+
+            var nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            var response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(1));
+
+            nock.ClearAll();
+
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query((url, query) =>
+                {
+                    return query["test"] == "2";
+                })
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=2";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "2" } };
+
+            nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FindNockedWebResponseCorrectlyFiltersBasedOnQueryNameValue()
+        {
+            var nvc = new NameValueCollection();
+            nvc.Add("test", "2");
+
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query(nvc)
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            var request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=1";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "1" } };
+
+            var nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            var response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(1));
+
+            nock.ClearAll();
+
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query(nvc)
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=2";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "2" } };
+
+            nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Not.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void FindNockedWebResponseCorrectlyFiltersBasedOnQueryNameValueExact()
+        {
+            var nvc = new NameValueCollection();
+            nvc.Add("test", "1");
+
+            new nock("http://www.nock-fake-domain.co.uk")
+                .Get("/path/")
+                .Query(nvc, true)
+                .Reply(HttpStatusCode.OK, "I am a test response");
+
+            var request = new NockHttpWebRequest();
+            request.RequestUri = "http://www.nock-fake-domain.co.uk/path/?test=1&test2=2";
+            request.Method = "GET";
+            request.InputStream = new MemoryStream();
+            request.Headers = new NameValueCollection();
+            request.Query = new NameValueCollection { { "test", "1" }, { "test2", "2" } };
+
+            var nockMatch = RequestMatcher.FindNockedWebResponse(request);
+            var response = nockMatch.NockedRequest;
+
+            Assert.That(response, Is.Null);
+            Assert.That(nock.NockedRequests.Count, Is.EqualTo(1));
+        }
 
         /*
          * TODO: adsf
@@ -277,7 +436,7 @@ namespace Nock.net.Tests
          * when doing custom matching?
          * body matching all variations
          * dynamic response building function stuff?
-         */ 
+         */
 
 
     }

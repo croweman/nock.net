@@ -26,4 +26,13 @@
         StringFunc,
         TypedFunc
     }
+
+    internal enum QueryMatcher
+    {
+        None,
+        NameValue,
+        NameValueExact,
+        Func,
+        Bool
+    }
 }

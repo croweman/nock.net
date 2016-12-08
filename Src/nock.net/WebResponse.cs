@@ -19,5 +19,15 @@ namespace Nock.net
             ResponseHeaders = responseHeaders;
             ResponseBody = responseBody;
         }
+
+        public WebResponse(string responseBody)
+        {
+            if (responseBody == null)
+                responseBody = string.Empty;
+
+            ResponseHeaders = new NameValueCollection();
+            ResponseBody = responseBody;
+
+        }
     }
 }

@@ -26,7 +26,11 @@ namespace Nock.net
         public NameValueCollection RequestHeaders { get; internal set; }
         public Func<NameValueCollection, bool> RequestHeaderMatcher { get; internal set; }
         public NameValueCollection ResponseHeaders { get; internal set; }
-        public Func<string, NameValueCollection, string, WebResponse> ResponseCreator { get; internal set; }
+        public Func<string, NameValueCollection, NameValueCollection, string, WebResponse> ResponseCreator { get; internal set; }
+        public QueryMatcher QueryMatcher { get; internal set; }
+        public bool QueryResult { get; internal set; }
+        public NameValueCollection Query { get; internal set; }
+        public Func<string, NameValueCollection, bool> QueryFunc { get; internal set; }
         public bool IsDone { get; internal set; }
         public int Times { get; internal set; }
         public Action<string> Logger { get; internal set; }

@@ -16,5 +16,6 @@ namespace Nock.net
         public string Method { get; set; }
         public NameValueCollection Headers { get; set; }
         public Stream InputStream { get; set; }
+        public NameValueCollection Query { get; set; }
     }
 }

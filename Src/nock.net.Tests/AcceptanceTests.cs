@@ -150,9 +150,8 @@ namespace Nock.net.Tests
             var nock = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/*/?location=true")
-                .Reply(HttpStatusCode.OK, (url, headers, body) =>
+                .Reply(HttpStatusCode.OK, (url, headers, query, body) =>
                 {
-                    url = url.Substring(0, url.IndexOf("?"));
                     var responseHeaders = new NameValueCollection();
                     responseHeaders.Add("Location", url);
 
@@ -487,7 +486,7 @@ namespace Nock.net.Tests
                 .ContentType("application/json; encoding='utf-8'")
                 .MatchHeader("cheese", "gravy")
                 .Post("/api/v2/action/")
-                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestBody) =>
+                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQueryString, requestBody) =>
                 {
                     var headers = new NameValueCollection();
                     headers.Add("crowe", "man");
@@ -518,13 +517,43 @@ namespace Nock.net.Tests
         }
 
         [Test]
+        public void NockedResponseCorrectlyRespondsBasedOnResponseCreatorFunctionWithQueryString()
+        {
+            var nock = new nock("http://domain-name.com")
+                .ContentType("application/json; encoding='utf-8'")
+                .Get("/api/v2/action/")
+                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQueryString, requestBody) =>
+                {
+                    var query = "";
+
+                    foreach (var key in requestQueryString.AllKeys)
+                    {
+                        query += string.Format("{0}:{1}", key, requestQueryString[key]);
+                    }
+
+                    return new WebResponse(string.Format("0:{0},1:{1},2:{2}", requestUrl, query, requestBody));
+                });
+
+            var request = WebRequest.Create("http://domain-name.com/api/v2/action/?test=1") as HttpWebRequest;
+            request.ContentType = "application/json; encoding='utf-8'";
+            request.Method = "Get";
+
+            System.Net.WebResponse response = request.GetResponse();
+            var bodyOne = ReadResponseBody(response);
+            Console.WriteLine(bodyOne);
+
+            Assert.That(nock.Done(), Is.True);
+            Assert.That(bodyOne, Is.EqualTo("0:http://domain-name.com/api/v2/action/,1:test:1,2:"));
+        }
+
+        [Test]
         public void NockedPostRequestsWorkCorrectlyWithBodyFilterAndCustomResponse()
         {
             var nock = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .MatchHeader("cheese", "gravy")
                 .Post("/api/v2/action/", (body) => { return body.Contains("AddFunds"); })
-                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestBody) =>
+                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQuery, requestBody) =>
                 {
                     var firstName = requestBody.Substring(requestBody.IndexOf("FirstName") + 12);
                     firstName = firstName.Substring(0, firstName.IndexOf("\""));

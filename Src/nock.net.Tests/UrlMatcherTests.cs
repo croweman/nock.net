@@ -21,6 +21,11 @@ namespace Nock.net.Tests
         [TestCase(true, "http://www.cheese.com/fish?tags=one,two&peas=1", "http://www.cheese.com", "/fish?tags=*&peas=1")]
         [TestCase(false, "http://www.cheese.com/fish?tags=one,two&peas=2", "http://www.cheese.com", "/fish?tags=*&peas=1")]
         [TestCase(true, "http://www.domain-name.com/one/?location=true", "http://www.domain-name.com", "/*/?location=true")]
+        [TestCase(true, "http://www.domain-name.com/one/?location=true", "http://www.domain-name.com", "/*/?location=true")]
+        [TestCase(true, "http://www.domain-name.com/one/?location=true", "http://www.domain-name.com", "/one/")]
+        [TestCase(true, "http://www.domain-name.com/one/", "http://www.domain-name.com", "/*/")]
+        [TestCase(true, "http://www.domain-name.com/one/?fish=chips", "http://www.domain-name.com", "/one/")]
+        [TestCase(true, "http://www.domain-name.com/one/?fish=peas", "http://www.domain-name.com", "/one/")]
         public void TestUrlMatching(bool expectation, string requestUrl, string nockedRequestUrl, string nockedRequestPath)
         {
 

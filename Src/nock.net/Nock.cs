@@ -33,7 +33,12 @@ namespace Nock.net
         private object _bodyMatcherFunc;
         private Type _bodyMatcherType;
 
-        private Func<string, NameValueCollection, string, WebResponse> _responseCreator;
+        private QueryMatcher _queryMatcher = QueryMatcher.None;
+        private bool _queryResult;
+        private NameValueCollection _query;
+        private Func<string, NameValueCollection, bool> _queryFunc;
+
+        private Func<string, NameValueCollection, NameValueCollection, string, WebResponse> _responseCreator;
 
         private static Listener _listener;
         private static WebProxy _webProxy;
@@ -307,7 +312,28 @@ namespace Nock.net
             return this;
         }
 
-        public nock Reply(HttpStatusCode statusCode, Func<string, NameValueCollection, string, WebResponse> responseCreator)
+        public nock Query(bool result)
+        {
+            _queryMatcher = QueryMatcher.Bool;
+            _queryResult = result;
+            return this;
+        }
+
+        public nock Query(NameValueCollection queryParameters, bool exactMatch = false)
+        {
+            _queryMatcher = exactMatch == true ? QueryMatcher.NameValueExact : QueryMatcher.NameValue;
+            _query = queryParameters;
+            return this;
+        }
+
+        public nock Query(Func<string, NameValueCollection, bool> queryMatcher)
+        {
+            _queryMatcher = QueryMatcher.Func;
+            _queryFunc = queryMatcher;
+            return this;
+        }
+
+        public nock Reply(HttpStatusCode statusCode, Func<string, NameValueCollection, NameValueCollection, string, WebResponse> responseCreator)
         {
             if (responseCreator == null)
                 throw new ArgumentException("Response creator function is invalid");
@@ -348,6 +374,12 @@ namespace Nock.net
             _nockedRequest.RequestHeaders = _requestHeaders;
             _nockedRequest.RequestHeaderMatcher = _requestHeadersMatcher;
             _nockedRequest.ResponseCreator = _responseCreator;
+
+            _nockedRequest.Query = _query;
+            _nockedRequest.QueryFunc = _queryFunc;
+            _nockedRequest.QueryMatcher = _queryMatcher;
+            _nockedRequest.QueryResult = _queryResult;
+
             _nockedRequest.Times = 1;
             _nockedRequest.Logger = _logger;
             NockedRequests.Add(_nockedRequest);

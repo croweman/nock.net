@@ -32,7 +32,7 @@ namespace Nock.net
                 foreach (var nockedRequest in nock.NockedRequests)
                 {               
                     if (!CheckUrl(request, nockedRequest) || !CheckMethod(request, nockedRequest) ||
-                        !CheckHeaders(request, nockedRequest) || !CheckBody(request, nockedRequest, nockMatch.RequestedBody))
+                        !CheckHeaders(request, nockedRequest) || !CheckQuery(request, nockedRequest)|| !CheckBody(request, nockedRequest, nockMatch.RequestedBody))
                     {
                         Log(nockedRequest, "Nock has not been matched :S");
                         continue;
@@ -107,6 +107,57 @@ namespace Nock.net
             }
 
             Log(nockedRequest, "Header matcher result: true");
+            return true;
+        }
+
+        private static bool CheckQuery(NockHttpWebRequest request, NockedRequest nockedRequest)
+        {
+            if (nockedRequest.QueryMatcher == QueryMatcher.None)
+                return true;
+
+            if (nockedRequest.QueryMatcher == QueryMatcher.NameValue || nockedRequest.QueryMatcher == QueryMatcher.NameValueExact)
+            {
+                if (!QueryStringMatch(nockedRequest, nockedRequest.Query, request.Query))
+                    return false;
+
+                if (nockedRequest.QueryMatcher == QueryMatcher.NameValueExact && nockedRequest.Query.Count != request.Query.Count)
+                {
+                    Log(nockedRequest, "Exact query match is enabled and the number of nocked request query keys and actual request query keys did not match");
+                    return false;
+                }
+            }
+
+            if (nockedRequest.QueryMatcher == QueryMatcher.Bool)
+            {
+                Log(nockedRequest, "Query matcher result: " + nockedRequest.QueryResult);
+                return nockedRequest.QueryResult;
+            }
+
+            if (nockedRequest.QueryFunc != null)
+            {
+                try
+                {
+                    var url = request.RequestUri;
+
+                    if (url.Contains("?"))
+                    {
+                        url = url.Substring(0, url.IndexOf("?"));
+                    }
+
+                    var match = nockedRequest.QueryFunc(url, request.Query);
+                    Log(nockedRequest, "Query matcher result: " + match);
+                    return match;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Nock.net: An error occurred while trying to check the query: " + ex.Message);
+                    Log(nockedRequest, "An error occurred while trying to check the query: " + ex.Message);
+                    Log(nockedRequest, "Custom query matcher result: false");
+                    return false;
+                }
+            }
+
+            Log(nockedRequest, "Query matcher result: true");
             return true;
         }
 
@@ -212,6 +263,40 @@ namespace Nock.net
             }
 
             Log(nockedRequest, "Request headers matched: " + matched);
+            return matched;
+        }
+
+        private static bool QueryStringMatch(NockedRequest nockedRequest, NameValueCollection requiredQueryHeaders, NameValueCollection queryHeaders)
+        {
+            var matched = true;
+
+            foreach (var requiredKey in requiredQueryHeaders.AllKeys)
+            {
+                var requiredValue = requiredQueryHeaders[requiredKey];
+                Log(nockedRequest, string.Format("Trying to match query '{0}'", requiredKey));
+
+                var matchingKey = queryHeaders.AllKeys.FirstOrDefault(x => string.Equals(requiredKey, x));
+
+                if (string.IsNullOrEmpty(matchingKey))
+                {
+                    Log(nockedRequest, string.Format("Query '{0}' could not be found", requiredKey));
+                    matched = false;
+                    break;
+                }
+
+                if (!string.Equals(requiredValue, queryHeaders[requiredKey]))
+                {
+                    Log(nockedRequest, string.Format("Query header value '{0}' did not match nocked request value '{1}'.", queryHeaders[requiredKey], requiredValue));
+                    matched = false;
+                    break;
+                }
+                else
+                {
+                    Log(nockedRequest, string.Format("Query header value '{0}' matched nocked request value '{1}'.", queryHeaders[requiredKey], requiredValue));
+                }
+            }
+
+            Log(nockedRequest, "Query headers matched: " + matched);
             return matched;
         }
 
