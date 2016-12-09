@@ -32,7 +32,7 @@ namespace Nock.net
         {
             ThreadPool.QueueUserWorkItem((o) =>
             {
-                Console.WriteLine("Nock.net: Webserver running...");
+                Console.WriteLine("Nock.net: Webserver running *:8080 ...");
                 try
                 {
                     while (_listener.IsListening)

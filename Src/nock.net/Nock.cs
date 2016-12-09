@@ -67,18 +67,6 @@ namespace Nock.net
             }
         }
 
-        public static bool CreateWebProxy
-        {
-            get
-            {
-                return _createWebProxy;
-            }
-            set
-            {
-                _createWebProxy = value;
-            }
-        }
-
         public static bool SetDefaultCredentials
         {
             get
@@ -88,6 +76,30 @@ namespace Nock.net
             set
             {
                 _setDefaultCredentials = value;
+            }
+        }
+
+        public static void ClearAll()
+        {
+            NockedRequests.Clear();
+        }
+
+        public static void RemoveInterceptor(nock nock)
+        {
+            NockedRequests.Remove(nock._nockedRequest);
+        }
+
+        public static void Stop()
+        {
+            lock (LockObject)
+            {
+                if (Testing)
+                {
+                    if (_listener != null)
+                        _listener.Stop();
+
+                    Testing = false;
+                }
             }
         }
 
@@ -111,16 +123,12 @@ namespace Nock.net
 
                 _listener.Run();
 
-                if (!CreateWebProxy)
-                    return;
-
                 _webProxy = new WebProxy("localhost", 8080);
                 _webProxy.BypassProxyOnLocal = false;
                 _webProxy.Credentials = CredentialCache.DefaultCredentials;
                 WebRequest.DefaultWebProxy = _webProxy;
             }         
         }
-
 
         private nock SetMethod(string path, Method method, string body = null, Func<string, bool> bodyMatcherString = null, Type bodyMatcherType = null, object bodyMatcherFunc = null)
         {
@@ -422,30 +430,6 @@ namespace Nock.net
         public bool Done()
         {
             return _nockedRequest.IsDone && _nockedRequest.Times == 0;
-        }
-
-        public static void ClearAll()
-        {
-            NockedRequests.Clear();
-        }
-
-        public static void RemoveInterceptor(nock nock)
-        {
-            NockedRequests.Remove(nock._nockedRequest);
-        }
-
-        public static void Stop()
-        {
-            lock (LockObject)
-            {
-                if (Testing)
-                {
-                    if (_listener != null)
-                        _listener.Stop();
-
-                    Testing = false;
-                }
-            }
         }
 
         private void IsCorrectlyReferencedFunction(object function)

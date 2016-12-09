@@ -630,6 +630,30 @@ namespace Nock.net.Tests
         }
 
         [Test]
+        public void Test301Redirects()
+        {
+            var nock = new nock("http://domain-name.com")
+                .Get("/api/v2/action/")
+                .Reply(HttpStatusCode.TemporaryRedirect, "", new NameValueCollection { { "Location", "http://blahasdfasdf.com/test" } });
+
+            var nock2 = new nock("http://blahasdfasdf.com")
+                .Get("/test")
+                .Reply(HttpStatusCode.OK, "OhYeh");
+
+            var request = WebRequest.Create("http://domain-name.com/api/v2/action/") as HttpWebRequest;
+            request.ContentType = "application/json; encoding='utf-8'";
+            request.Method = "Get";
+            request.AllowAutoRedirect = true;
+
+            System.Net.WebResponse response = request.GetResponse();
+            var bodyOne = ReadResponseBody(response);
+            Console.WriteLine(bodyOne);
+
+            Assert.That(nock.Done(), Is.True);
+            Assert.That(bodyOne, Is.EqualTo("OhYeh"));
+        }
+
+        [Test]
         public void NockedResponsesCorrectlyRespondWhenContentTypeDiffers()
         {
             var xmlResponse = "<somexml />";
