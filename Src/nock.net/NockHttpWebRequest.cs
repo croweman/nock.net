@@ -10,6 +10,7 @@ namespace Nock.net
         public  NockHttpWebRequest()
         {
             Headers = new NameValueCollection();
+            Query = new NameValueCollection();
         }
 
         public string RequestUri { get; set; }

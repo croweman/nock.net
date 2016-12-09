@@ -49,6 +49,9 @@
     <Compile Include="NockMatch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NockedRequest.cs" />
+    <Compile Include="QueryDetails.cs" />
+    <Compile Include="Recorder.cs" />
+    <Compile Include="RequestDetails.cs" />
     <Compile Include="RequestMatcher.cs" />
     <Compile Include="Listener.cs" />
     <Compile Include="NockHttpWebRequest.cs" />

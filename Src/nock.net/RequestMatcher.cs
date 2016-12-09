@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using Newtonsoft.Json;
 using System.Collections.Specialized;
 
@@ -112,6 +111,16 @@ namespace Nock.net
 
         private static bool CheckQuery(NockHttpWebRequest request, NockedRequest nockedRequest)
         {
+            if (request.Query.Count == 0 && nockedRequest.QueryMatcher == QueryMatcher.None)
+                return true;
+
+            if (request.Query.Count > 0 && !request.RequestUri.Contains("?") && nockedRequest.QueryMatcher == QueryMatcher.None)
+            {
+                Log(nockedRequest, "A query string has been specified in the request url, but query matcher has not been defined");
+                Log(nockedRequest, "Query matcher result: false");
+                return false;
+            }
+
             if (nockedRequest.QueryMatcher == QueryMatcher.None)
                 return true;
 
@@ -144,7 +153,7 @@ namespace Nock.net
                         url = url.Substring(0, url.IndexOf("?"));
                     }
 
-                    var match = nockedRequest.QueryFunc(url, request.Query);
+                    var match = nockedRequest.QueryFunc(new QueryDetails(url, request.Query));
                     Log(nockedRequest, "Query matcher result: " + match);
                     return match;
                 }

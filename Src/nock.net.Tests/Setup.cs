@@ -7,7 +7,7 @@ public class Setup
 {
     [OneTimeSetUp]
     public void Configure()
-    {   
+    {
         nock.RequestTimeoutInMilliseconds = 1000;
     }
     [OneTimeTearDown]

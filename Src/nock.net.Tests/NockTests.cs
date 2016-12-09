@@ -253,7 +253,7 @@ namespace Nock.net.Tests
         [Test]
         public void QueryFunctionCorrectlyCreatesFuncMatch()
         {
-            var nock = new nock("http://www.google.co.uk").Get("/").Query((url, query) => { return true; }).Reply(HttpStatusCode.OK, "");
+            var nock = new nock("http://www.google.co.uk").Get("/").Query((queryDetails) => { return true; }).Reply(HttpStatusCode.OK, "");
             Assert.That(nock.NockedRequests.Count, Is.EqualTo(1));
             Assert.That(nock.NockedRequests[0].QueryMatcher, Is.EqualTo(QueryMatcher.Func));
             Assert.That(nock.NockedRequests[0].QueryFunc != null, Is.EqualTo(true));
@@ -324,13 +324,13 @@ public void ReplyWillThrowAnExceptionIfNockHasAlreadyBeenBuilt()
 [Test]
 public void ReplyWillThrowAnExceptionIfNullResponseCreatorIsDefined()
 {
-    Func<string, NameValueCollection, NameValueCollection, string, WebResponse> blah = null;
+    Func<RequestDetails, WebResponse> blah = null;
 
     var exception = Assert.Catch<Exception>(() => new nock("http://www.google.co.uk").Get("/").Reply(HttpStatusCode.OK, blah));
     Assert.That(exception.Message, Is.EqualTo("Response creator function is invalid"));
 }
 
-private WebResponse Blah(string url, NameValueCollection headers, NameValueCollection query, string body)
+private WebResponse Blah(RequestDetails requestDetails)
 {
     return null;
 }

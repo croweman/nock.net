@@ -317,9 +317,9 @@ namespace Nock.net.Tests
         {
             new nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
-                .Query((url, query) =>
+                .Query((queryDetails) =>
                 {
-                    return query["test"] == "2";
+                    return queryDetails.Query["test"] == "2";
                 })
                 .Reply(HttpStatusCode.OK, "I am a test response");
 
@@ -340,9 +340,9 @@ namespace Nock.net.Tests
 
             new nock("http://www.nock-fake-domain.co.uk")
                 .Get("/path/")
-                .Query((url, query) =>
+                .Query((queryDetails) =>
                 {
-                    return query["test"] == "2";
+                    return queryDetails.Query["test"] == "2";
                 })
                 .Reply(HttpStatusCode.OK, "I am a test response");
 

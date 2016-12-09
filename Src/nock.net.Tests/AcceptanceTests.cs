@@ -25,8 +25,8 @@ namespace Nock.net.Tests
 
         [Test]
         public void CallingDoneOnANockReturnsFalseIfTheNockResponseWasNotUsed()
-        {
-            var nock = new nock("http://domain-name.com")
+        { 
+            var nock1 = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/api/v2/action/")
                 .Reply(HttpStatusCode.OK, "The body");
@@ -45,14 +45,13 @@ namespace Nock.net.Tests
                 Assert.AreEqual(err.Message, "The remote server returned an error: (417) Expectation Failed.");
             }
 
-            Assert.That(nock.Done(), Is.False);
+            Assert.That(nock1.Done(), Is.False);
         }
 
         [Test]
         public void CallingDoneOnANockReturnsTrueIfTheNockResponseWasUsed()
         {
-
-            var nock = new nock("http://domain-name.com")
+            var nock1 = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/api/v2/action/")
                 .Log(Console.WriteLine)
@@ -63,7 +62,7 @@ namespace Nock.net.Tests
             request.Method = "GET";
             System.Net.WebResponse response = request.GetResponse();
 
-            Assert.That(nock.Done(), Is.True);
+            Assert.That(nock1.Done(), Is.True);
         }
 
         [Test]
@@ -150,12 +149,12 @@ namespace Nock.net.Tests
             var nock = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/*/?location=true")
-                .Reply(HttpStatusCode.OK, (url, headers, query, body) =>
+                .Reply(HttpStatusCode.OK, (requestDetails) =>
                 {
                     var responseHeaders = new NameValueCollection();
-                    responseHeaders.Add("Location", url);
+                    responseHeaders.Add("Location", requestDetails.Url);
 
-                    return new WebResponse(responseHeaders, "{ \"src\": \"" + url + "\" }");
+                    return new WebResponse(responseHeaders, "{ \"src\": \"" + requestDetails.Url + "\" }");
                 })
                 .Times(2);
 
@@ -486,7 +485,7 @@ namespace Nock.net.Tests
                 .ContentType("application/json; encoding='utf-8'")
                 .MatchHeader("cheese", "gravy")
                 .Post("/api/v2/action/")
-                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQueryString, requestBody) =>
+                .Reply(HttpStatusCode.OK, (requestDetails) =>
                 {
                     var headers = new NameValueCollection();
                     headers.Add("crowe", "man");
@@ -522,16 +521,17 @@ namespace Nock.net.Tests
             var nock = new nock("http://domain-name.com")
                 .ContentType("application/json; encoding='utf-8'")
                 .Get("/api/v2/action/")
-                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQueryString, requestBody) =>
+                .Query(true)
+                .Reply(HttpStatusCode.OK, (requestDetails) =>
                 {
                     var query = "";
 
-                    foreach (var key in requestQueryString.AllKeys)
+                    foreach (var key in requestDetails.Query.AllKeys)
                     {
-                        query += string.Format("{0}:{1}", key, requestQueryString[key]);
+                        query += string.Format("{0}:{1}", key, requestDetails.Query[key]);
                     }
 
-                    return new WebResponse(string.Format("0:{0},1:{1},2:{2}", requestUrl, query, requestBody));
+                    return new WebResponse(string.Format("0:{0},1:{1},2:{2}", requestDetails.Url, query, requestDetails.Body));
                 });
 
             var request = WebRequest.Create("http://domain-name.com/api/v2/action/?test=1") as HttpWebRequest;
@@ -553,8 +553,9 @@ namespace Nock.net.Tests
                 .ContentType("application/json; encoding='utf-8'")
                 .MatchHeader("cheese", "gravy")
                 .Post("/api/v2/action/", (body) => { return body.Contains("AddFunds"); })
-                .Reply(HttpStatusCode.OK, (requestUrl, requestHeaders, requestQuery, requestBody) =>
+                .Reply(HttpStatusCode.OK, (requestDetails) =>
                 {
+                    var requestBody = requestDetails.Body;
                     var firstName = requestBody.Substring(requestBody.IndexOf("FirstName") + 12);
                     firstName = firstName.Substring(0, firstName.IndexOf("\""));
                     var surname = requestBody.Substring(requestBody.IndexOf("Surname") + 10);
@@ -666,12 +667,12 @@ namespace Nock.net.Tests
             Assert.That(body, Is.EqualTo(xmlResponse));
         }
 
-        [TestCase(HttpStatusCode.OK, "Added", Status.OK)]
-        [TestCase(HttpStatusCode.OK, "User not allowed", Status.Forbidden)]
-        [TestCase(HttpStatusCode.OK, "User could not be found", Status.NotFound)]
-        [TestCase(HttpStatusCode.ServiceUnavailable, "Something went wrong", Status.Error)]
+        [TestCase("Added", Status.OK)]
+        [TestCase("User not allowed", Status.Forbidden)]
+        [TestCase("User could not be found", Status.NotFound)]
+        [TestCase("Something went wrong", Status.Error)]
         [Test]
-        public void NockingAResponseCorrectlyReturnsRelevantResponses(HttpStatusCode? statusCode, string resultMessage, Status expectedStatus)
+        public void NockingAResponseCorrectlyReturnsRelevantResponses(string resultMessage, Status expectedStatus)
         {
             var responseJson = string.Format("{{ result: \"{0}\" }}", resultMessage);
 
@@ -680,9 +681,9 @@ namespace Nock.net.Tests
                 .Post("/api/v2/action/")
                 .Reply(HttpStatusCode.OK, responseJson);
 
-            var postData = PostDataToAnEndpointAndProcessTheResponse();
+            var postResult = PostDataToAnEndpointAndProcessTheResponse();
 
-            Assert.That(postData.Status, Is.EqualTo(expectedStatus));
+            Assert.That(postResult.Status, Is.EqualTo(expectedStatus));
         }
 
         public PostResult PostDataToAnEndpointAndProcessTheResponse()
@@ -789,19 +790,6 @@ namespace Nock.net.Tests
         {
             public string Result { get; set; }
         }
-
-        //public class CustomHttpWebResponse : System.Net.WebResponse
-        //{
-        //    private readonly NameValueCollection _headers = new NameValueCollection();
-
-        //    public override WebHeaderCollection Headers
-        //    {
-        //        get
-        //        {
-        //            return _headers;
-        //        }
-        //    }
-        //}
 
         public class PostResult
         {

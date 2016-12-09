@@ -3,6 +3,7 @@
 
 RUN AS ADMIN
 
+REC??????
 
 More complex object for request creator url
 .Query (true, blah)
@@ -21,7 +22,7 @@ Documentation - stop nock when all tests complete, all examples, body matcheers,
 start and stop, asserting nock called/used
 JSON example on body matching?
 
-417????????
+417???????? Document it, when passing through
 
 body matcher, what about JSON
 
@@ -47,11 +48,24 @@ Add a remove interceptor function to remove nock from nocked requests, documenta
 
 Request Body filtering
 
+isDone
+remove interceptor
+log
+record
+headers
+body,
+query
+wildcard
+static props
+
 
 what usually happens with 500 errors etc?
 
 
 COMPARE TO NOCK DOCUMENtation
+
+GLOBAL SETUP and teardown
+response headers!!
 
 
 proxying requests etc, must be able to post blah blah? and send body data??, tests?

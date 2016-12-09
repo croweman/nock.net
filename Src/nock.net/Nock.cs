@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.IO;
 using System.Net;
 
 namespace Nock.net
@@ -10,6 +9,7 @@ namespace Nock.net
     {
 
         private static readonly object LockObject = new object();
+        private static Recorder _recorder = new Recorder();
 
         internal static readonly List<NockedRequest> NockedRequests = new List<NockedRequest>();
         internal static bool Testing;
@@ -36,9 +36,9 @@ namespace Nock.net
         private QueryMatcher _queryMatcher = QueryMatcher.None;
         private bool _queryResult;
         private NameValueCollection _query;
-        private Func<string, NameValueCollection, bool> _queryFunc;
+        private Func<QueryDetails, bool> _queryFunc;
 
-        private Func<string, NameValueCollection, NameValueCollection, string, WebResponse> _responseCreator;
+        private Func<RequestDetails, WebResponse> _responseCreator;
 
         private static Listener _listener;
         private static WebProxy _webProxy;
@@ -47,6 +47,13 @@ namespace Nock.net
         private static bool _setDefaultCredentials = true;
         private static int? _requestTimeoutInMilliseconds = null;
 
+        public static Recorder Recorder
+        {
+            get
+            {
+                return _recorder;
+            }
+        }
 
         public static int? RequestTimeoutInMilliseconds
         {
@@ -326,14 +333,14 @@ namespace Nock.net
             return this;
         }
 
-        public nock Query(Func<string, NameValueCollection, bool> queryMatcher)
+        public nock Query(Func<QueryDetails, bool> queryMatcher)
         {
             _queryMatcher = QueryMatcher.Func;
             _queryFunc = queryMatcher;
             return this;
         }
 
-        public nock Reply(HttpStatusCode statusCode, Func<string, NameValueCollection, NameValueCollection, string, WebResponse> responseCreator)
+        public nock Reply(HttpStatusCode statusCode, Func<RequestDetails, WebResponse> responseCreator)
         {
             if (responseCreator == null)
                 throw new ArgumentException("Response creator function is invalid");
@@ -420,6 +427,11 @@ namespace Nock.net
         public static void ClearAll()
         {
             NockedRequests.Clear();
+        }
+
+        public static void RemoveInterceptor(nock nock)
+        {
+            NockedRequests.Remove(nock._nockedRequest);
         }
 
         public static void Stop()

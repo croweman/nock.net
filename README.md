@@ -1,20 +1,22 @@
 # Nock.net
 
-Nock.net is an HTTP mocking library for .Net
+Nock.net is an HTTP mocking and expectations library for .Net
 
 Nock.net can be used to aid in testing modules that perform HTTP requests in isolation.
 
-Nock.net.HttpWebRequest and Nock.net.IHttpWebResponse objects need to be used instead of the Standard System.Net HttpWebRequest and HttpWebResponse.
+For instance, if a module performs HTTP requests to a CouchDB server or makes HTTP requests to the Amazon API, you can test that module in isolation.
 
 It came to life because of nock in the node js world.
+
 
 ## Table of contents
 
 - [Install](#install)  
+- [How does it work?](#how-does-it-work) 
 - [Use](#use)  
   - [Specifying request body](#specifying-request-body)  
   - [Replying with exceptions](#replying-with-exceptions)
-  - [Replying with more detailed responses](#Replying-with-more-detailed-responses)
+  - [Replying with more detailed responses](#replying-with-more-detailed-responses)
   - [Specifying headers](#specifying-headers)
     - [Specifying request headers](#specifying-request-headers)
     - [Specifying reply headers](#specifying-reply-headers)
@@ -23,15 +25,24 @@ It came to life because of nock in the node js world.
   - [Real world example](#real-world-example)
 - [Expectations](#expectations)  
 - [Restoring](#restoring)  
-- [How does it work?](#how-does-it-work)  
 - [License](#license)  
 
 
-## Install
+## Install<a name="install"></a>
 
 Either reference the Nock.net assembly or Install from [nuget](https://www.nuget.org/packages/Nock.net/).
 
-## Use
+!! The test runner and CI build agent will need to run with ADMINISTRATOR privileges as the tests will create a web proxy for web request on localhost:8080 !!
+
+## How does it work?<a name="how-does-it-work"></a>
+
+Once a nocked request has been created a web proxy will be created that routes all requests within the running application through to http://localhost:8080.
+
+Nock.net creates a listener that listens to all web requests and tries to find a nocked response.  If a matching nocked response is found this is returned to the caller otherwise it tries to send the request out to the outside world.  If the request then fails a 417 response is returned.
+
+This proxy will be set as a default for all web requests.  If the running application is not using ADMINISTRATOR privileges or is setting alternative proxies on web requests the library will not work! 
+
+## Use<a name="use"></a>
 
 In your test you can setup a mocking object like the following:
 
@@ -47,18 +58,15 @@ public void Test()
 }
 ```
 
-You would then need implementation logic that would Create a Nock.net.HttpWebRequest and retrieve a response like this:
+You would then need implementation logic that would Create a HttpWebRequest and retrieve a response like this:
 
 ```#
-Nock.net.HttpWebRequest request = Nock.net.HttpWebRequest.CreateRequest("https://domain.com/users/1");
+var request = WebRequest.Create("http://domain-name.com/users/1") as HttpWebRequest;
 request.Method = "GET";
-
-Nock.net.IHttpWebResponse response = request.GetResponse();
+var response = request.GetResponse();
 ```
 
-Nock.net.HttpWebRequest and Nock.net.HttpWebResponse objects are wrappers over the System.Net.HttpWebResponse and System.Net.HttpWebRequest objects.
-
-### Specifying request body
+### Specifying request body<a name="specifying-request-body"></a>
 
 You can specify the request body to be matched as the second argument to the Get, Post, Put or Delete specifications like this:
 
@@ -68,38 +76,29 @@ var nock = new nock("http://domain.com")
     .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
 
-If no request body is defined on the Nocker then the body will not be used for matching
+If no request body is defined on the nock then the body will not be used for matching
 
-### Replying with exceptions
+### Replying with exceptions<a name="replying-with-exceptions"></a>
 
 You can reply with an exception like this:
 
 ```c#
 var nock = new nock("http://domain.com")
     .Get("/users/1")
-    .Reply(new WebException("An unexpected exception occurred"));
+    .Reply(HttpStatusCode.BadGatway, string.Empty);
 ```
 
-### Replying with more detailed responses
+### Replying with more detailed responses<a name="replying-with-more-detailed-responses"></a>
 
 ```c#
-var response = new TestHttpWebResponse("The body")
-{
-    StatusCode = HttpStatusCode.Created,
-    ContentType = "application/json",
-    CharacterSet = "blah"
-};
-
 var nock = new nock("http://domain.com")
     .Get("/users/1")
-    .Reply(response);
+    .Reply(HttpStatusCode.OK, "The body", new NameValueCollection { { "x-custom", "value" } });
 ```
 
-### Specifying headers
+### Specifying headers<a name="specifying-headers"></a>
 
-Header field names are case-insensitive
-
-### Specifying request headers
+### Specifying request headers<a name="specifying-request-headers"></a>
 
 You can specify the request headers to be matched against like this:
 
@@ -108,13 +107,36 @@ var webHeaders = new NameValueCollection { { "x-custom", "value" } };
 
 var nock = new nock("http://domain.com")
    .Get("/users/1")
-   .RequestHeaders(webHeaders)
+   .MatchHeaders(webHeaders)
+   .Reply(HttpStatusCode.OK, "{ value: 5 }");
+```
+
+You can also match headers individually:
+
+```c#
+var webHeaders = new NameValueCollection { { "x-custom", "value" } };
+
+var nock = new nock("http://domain.com")
+   .Get("/users/1")
+   .MatchHeader("x-custom", "value")
+   .MatchHeader("x-custom-2", "value-2")
+   .Reply(HttpStatusCode.OK, "{ value: 5 }");
+```
+
+Or you can define a custom static or inline delegate function to do custom filtering
+
+```c#
+var webHeaders = new NameValueCollection { { "x-custom", "value" } };
+
+var nock = new nock("http://domain.com")
+   .Get("/users/1")
+   .MatchHeaders((headers) => { return headers["x-custom"] == "value"; })
    .Reply(HttpStatusCode.OK, "{ value: 5 }");
 ```
 
 If no request headers are defined on the Nock then the request headers will not be used for matching
 
-### Specifying reply headers
+### Specifying reply headers<a name="specifying-reply-headers"></a>
 
 You can specify the reply headers like this:
 
@@ -126,7 +148,7 @@ var nock = new nock("http://domain.com")
    .Reply(HttpStatusCode.OK, "{ value: 5 }", responseHeaders);
 ```
 
-### Specifying content type
+### Specifying content type<a name="specifying-content-type"></a>
 
 If a content type is defined on a Nock then the request content type will be used for matching
 
@@ -135,12 +157,11 @@ var nock = new nock("http://domain.com")
    .Get("/users/1")
    .ContentType("application/json")
    .Reply(HttpStatusCode.OK, "{ value: 5 }")
-   .Times(3);
 ```
 
-### Repeat response n times
+### Repeat response n times<a name="repeat-response-n-times"></a>
 
-You are able to specify the number of times to repeat the same response.
+You are able to specify the number of times the same nock can be used.
 
 ```c#
 var nock = new nock("http://domain.com")
@@ -149,17 +170,25 @@ var nock = new nock("http://domain.com")
    .Times(3);
 ```
 
-### Restoring
+### Restoring<a name="restoring"></a>
 
 You can remove any previously unused nocks like this:
 
 ```c#
-Nocker.ClearAll();
+nock.ClearAll();
 ```
 
-## Expectations
+Or you can remove a specific nock like the following:
+
+```c#
+nock.RemoveInterceptor(nockedRequest);
+```
+
+## Expectations<a name="expectations"></a>
 
 You can determine whether a nock was called like this:
+
+Done returns true if the nock has been returned the required number of times.
 
 ```c#
 var nock = new nock("http://domain.com")
@@ -171,7 +200,7 @@ var nock = new nock("http://domain.com")
 Assert.That(nock.Done(), Is.True);
 ```
 
-### Real world example
+### Real world example<a name="real-world-example"><a/>
 
 Below is a real world usage sample with test and implementation code.
 
@@ -311,13 +340,8 @@ public class CustomHttpWebResponse : WebResponse
    }
 }
 ```
-## How does it work?
 
-The Nock.net assembly provides wrapper objects over the standard System.Net HttpWebResponse and HttpWebRequest objects.
-
-When Nockers have been created in your tests then relevant Nock.net.TestHttpWebResponse objects will be returned, these objects implement the Nock.net.IHttpWebResponse interface.
-
-## License
+## License<a name="license"></a>
 
 (The MIT License)
 
