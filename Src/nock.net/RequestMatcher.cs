@@ -29,9 +29,14 @@ namespace Nock.net
             lock (LockObject)
             {
                 foreach (var nockedRequest in nock.NockedRequests)
-                {               
-                    if (!CheckUrl(request, nockedRequest) || !CheckMethod(request, nockedRequest) ||
-                        !CheckHeaders(request, nockedRequest) || !CheckQuery(request, nockedRequest)|| !CheckBody(request, nockedRequest, nockMatch.RequestedBody))
+                {
+                    var checkUrlResult = CheckUrl(request, nockedRequest);
+                    var checkMethodResult = CheckMethod(request, nockedRequest);
+                    var checkHeadersResult = CheckHeaders(request, nockedRequest);
+                    var checkQueryResult = CheckQuery(request, nockedRequest);
+                    var checkBodyResult = CheckBody(request, nockedRequest, nockMatch.RequestedBody);
+
+                    if (!checkUrlResult || !checkMethodResult || !checkHeadersResult || !checkQueryResult || !checkBodyResult)
                     {
                         Log(nockedRequest, "Nock has not been matched :S");
                         continue;

@@ -47,13 +47,23 @@ namespace Nock.net
 
                                 foreach (var header in webResponse.Headers.AllKeys)
                                 {
-                                    ctx.Response.Headers[header] = webResponse.Headers[header];
+                                    SetResponseHeader(header, webResponse.Headers, ctx.Response);
                                 }
+
                                 ctx.Response.StatusCode = webResponse.Status;
+
+                                if (webResponse.Body.StartsWith("Nock.net"))
+                                {
+                                    webResponse.Body = string.Empty;
+                                }
 
                                 byte[] buf = Encoding.UTF8.GetBytes(webResponse.Body);
                                 ctx.Response.ContentLength64 = buf.Length;
                                 ctx.Response.OutputStream.Write(buf, 0, buf.Length);
+                            }
+                            catch (Exception ex)
+                            {
+                                var exception = ex;
                             }
                             finally
                             {
@@ -83,20 +93,7 @@ namespace Nock.net
                     if (WebHeaderCollection.IsRestricted(key))
                     {
                         var currentKey = key.ToLower().Trim();
-                        var lookup = new Tuple<string, string>[13];
-                        lookup[0] = new Tuple<string, string>("accept", "Accept");
-                        lookup[1] = new Tuple<string, string>("connection", "Connection");
-                        lookup[2] = new Tuple<string, string>("content-length", "ContentLength");
-                        lookup[3] = new Tuple<string, string>("content-type", "ContentType");
-                        lookup[4] = new Tuple<string, string>("date", "Date");
-                        lookup[5] = new Tuple<string, string>("expect", "Expect");
-                        lookup[6] = new Tuple<string, string>("host", "Host");
-                        lookup[7] = new Tuple<string, string>("if-modified-since", "IfModifiedSince");
-                        lookup[8] = new Tuple<string, string>("range", "Range");
-                        lookup[9] = new Tuple<string, string>("referrer", "Referrer");
-                        lookup[10] = new Tuple<string, string>("transfer-encoding", "TransferEncoding");
-                        lookup[11] = new Tuple<string, string>("user-agent", "UserAgent");
-                        lookup[11] = new Tuple<string, string>("proxy-connection", "KeepAlive");
+                        var lookup = GetRestrictedHeaderLookup();
 
                         var match = lookup.FirstOrDefault(x => x.Item1 == currentKey);
 
@@ -140,6 +137,72 @@ namespace Nock.net
             return webHeaders;
         }
 
+        private void SetResponseHeader(string key, NameValueCollection headers, HttpListenerResponse response)
+        {
+            bool setValue = true;
+
+            if (WebHeaderCollection.IsRestricted(key))
+            {
+                var currentKey = key.ToLower().Trim();
+                var lookup = GetRestrictedHeaderLookup();
+
+                var match = lookup.FirstOrDefault(x => x.Item1 == currentKey);
+
+                if (match != null)
+                {
+                    setValue = false;
+
+                    try
+                    {
+                        if (headers[key].ToLower() == "keep-alive")
+                        {
+                            response.GetType().InvokeMember("KeepAlive", BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty, Type.DefaultBinder, response, new object[] { true });
+                        }
+                        else
+                        {
+                            response.GetType().InvokeMember(match.Item2, BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty, Type.DefaultBinder, response, new object[] { headers[key] });
+                        }
+                    }
+                    catch (Exception) { }
+                }
+            }
+
+            if (setValue)
+            {
+                try
+                {
+                    if (Array.IndexOf(response.Headers.AllKeys, key) != -1)
+                    {
+                        response.Headers[key] = headers[key];
+                    }
+                    else
+                    {
+                        response.Headers.Add(key, headers[key]);
+                    }
+                }
+                catch (Exception) { }
+            }
+        }
+
+        private static Tuple<string, string>[] GetRestrictedHeaderLookup()
+        {
+            var lookup = new Tuple<string, string>[13];
+            lookup[0] = new Tuple<string, string>("accept", "Accept");
+            lookup[1] = new Tuple<string, string>("connection", "Connection");
+            lookup[2] = new Tuple<string, string>("content-length", "ContentLength");
+            lookup[3] = new Tuple<string, string>("content-type", "ContentType");
+            lookup[4] = new Tuple<string, string>("date", "Date");
+            lookup[5] = new Tuple<string, string>("expect", "Expect");
+            lookup[6] = new Tuple<string, string>("host", "Host");
+            lookup[7] = new Tuple<string, string>("if-modified-since", "IfModifiedSince");
+            lookup[8] = new Tuple<string, string>("range", "Range");
+            lookup[9] = new Tuple<string, string>("referrer", "Referrer");
+            lookup[10] = new Tuple<string, string>("transfer-encoding", "TransferEncoding");
+            lookup[11] = new Tuple<string, string>("user-agent", "UserAgent");
+            lookup[12] = new Tuple<string, string>("proxy-connection", "KeepAlive");
+            return lookup;
+        }
+
         private static NockHttpWebResponse GetResponse(HttpListenerRequest request)
         {
             if (nock.Recorder.IsRecording)
@@ -149,9 +212,16 @@ namespace Nock.net
 
             var headers = request.Headers;
 
+            var requestUri = request.RawUrl;
+            
+            if (!requestUri.ToLower().StartsWith("http://") && !requestUri.ToLower().StartsWith("https://"))
+            {
+                requestUri = request.Url.AbsoluteUri;
+            }
+
             var nockedMatch = RequestMatcher.FindNockedWebResponse(new NockHttpWebRequest()
             {
-                RequestUri = request.RawUrl,
+                RequestUri = requestUri,
                 Headers = headers,
                 Method = request.HttpMethod,
                 InputStream = request.InputStream,
